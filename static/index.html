@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Runner Chatbot</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0a2/full/pyodide.js"></script>
+</head>
+
+<body>
+    <main class="container">
+        <h1 style="text-align:center;">Code Runner Chatbot</h1>
+        <textarea name="query" id="query" cols="30" rows="10" placeholder="Ask a question about the dataset"></textarea>
+        <button id="ask-btn">Ask</button>
+        <div id="output"></div>
+    </main>
+    <script>
+        window.globalMessage = {}
+        const queryTextArea = document.getElementById('query');
+        const outputElement = document.getElementById('output');
+        const askBtn = document.getElementById('ask-btn');
+
+        async function setupPyodide() {
+            let pyodide = await loadPyodide();
+            await pyodide.loadPackage("micropip");
+            const micropip = pyodide.pyimport("micropip");
+            await micropip.install('langchain==0.3.25')
+            await micropip.install('langchain_ollama==0.3.3')
+            await micropip.install('langchain_community==0.3.17')
+            await micropip.uninstall('httpx')
+            await pyodide.loadPackage('/httpx-0.28.1-py3-none-any.whl')
+            pyodide.globals.set("output_callback", (token) => streamOutput(token));
+            // console.log(micropip.freeze())
+
+            pyodide.runPythonAsync(`
+
+            from langchain.callbacks.base import BaseCallbackHandler
+            from langchain_core.output_parsers import StrOutputParser
+
+            class MyStreamingHandler(BaseCallbackHandler):
+                def on_llm_new_token(self, token: str, **kwargs):
+                    output_callback(token)
+                    print(token, end='', flush=True)
+
+            from langchain.chains import LLMChain
+            from langchain_ollama import ChatOllama
+            from langchain.prompts import PromptTemplate
+            from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+
+            my_handler = MyStreamingHandler()
+            prompt = PromptTemplate.from_template("Answer user query: {query}")
+
+            llm = ChatOllama(
+                model="llama3:latest",
+                streaming=True,
+                callbacks=[my_handler],
+                verbose=False
+            )
+
+            chain = prompt | llm | StrOutputParser()
+            `)
+
+
+            return pyodide;
+        }
+
+        function streamOutput(text) {
+          console.log(new Date().getMilliseconds().toString())
+          outputElement.textContent += text;
+        }
+
+        let pyodideReadyPromise = setupPyodide();
+
+        askBtn.addEventListener('click', async (event) => {
+
+            if (!pyodide)
+              var pyodide = await pyodideReadyPromise;
+
+            window.globalMessage.query = queryTextArea.value;
+            window.globalMessage.output = outputElement
+            outputElement.textContent=""
+
+            pyodide.runPythonAsync(`
+              from js import globalMessage
+              query=globalMessage.query
+              # query = "Give me a complete code example for a bot"
+              await chain.ainvoke({"query": query})
+
+            `)
+        });
+    </script>
+</body>
+
+</html>
