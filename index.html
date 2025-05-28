@@ -5,23 +5,51 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Runner Chatbot</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <title>PrivateGPT</title>
+    <link rel="stylesheet" href="static/pico.min.css">
+    <script src="static/showdown.min.js"></script>
+    <script type="module" src="./modules/app.js"></script>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0a2/full/pyodide.js"></script>
 </head>
 
 <body>
+
+  <!-- <script>
+    async function setupPyodide() {
+      let pyodide = await loadPyodide();
+      await pyodide.loadPackage("micropip");
+      const micropip = pyodide.pyimport("micropip");
+      await micropip.install('langchain==0.3.25')
+      await micropip.install('langchain_ollama==0.3.3')
+      await micropip.install('langchain_community==0.3.17')
+      await micropip.uninstall('httpx')
+      await pyodide.loadPackage('/static/httpx-0.28.1-py3-none-any.whl')
+      // pyodide.globals.set("output_callback", (token) => streamOutput(token));
+      // console.log(micropip.freeze())
+    }
+  </script> -->
+
     <main class="container">
-        <h1 style="text-align:center;">Code Runner Chatbot</h1>
-        <textarea name="query" id="query" cols="30" rows="10" placeholder="Ask a question about the dataset"></textarea>
-        <button id="ask-btn">Ask</button>
-        <div id="output"></div>
+      <hgroup>
+        <h1 style="text-align:center;">Get inspired with CSS</h1>
+        <p style="text-align:center;">How to use CSS to add glam to your Website?</p>
+      </hgroup>
+      <md-app />
     </main>
-    <script>
+
+    <!-- <main class="container">
+        <h1 style="text-align:center;">Code Runner Chatbot</h1>
+        <div id="output"></div>
+        <input id="query" placeholder="Ask a question about the dataset"></input>
+        <button id="ask-btn">Ask</button>
+    </main> -->
+    <!-- <script>
+      var converter = new showdown.Converter();
         window.globalMessage = {}
         const queryTextArea = document.getElementById('query');
         const outputElement = document.getElementById('output');
         const askBtn = document.getElementById('ask-btn');
+        var msg = ""
 
         async function setupPyodide() {
             let pyodide = await loadPyodide();
@@ -31,7 +59,7 @@
             await micropip.install('langchain_ollama==0.3.3')
             await micropip.install('langchain_community==0.3.17')
             await micropip.uninstall('httpx')
-            await pyodide.loadPackage('/httpx-0.28.1-py3-none-any.whl')
+            await pyodide.loadPackage('/static/httpx-0.28.1-py3-none-any.whl')
             pyodide.globals.set("output_callback", (token) => streamOutput(token));
             // console.log(micropip.freeze())
 
@@ -63,13 +91,19 @@
             chain = prompt | llm | StrOutputParser()
             `)
 
-
+            askBtn.ariaBusy = "false";
             return pyodide;
         }
 
+
         function streamOutput(text) {
-          console.log(new Date().getMilliseconds().toString())
-          outputElement.textContent += text;
+          if (text) {
+            msg += text;
+            console.log("-"+msg+"-")
+            var html = converter.makeHtml(msg);
+            outputElement.innerHTML = html
+            console.log(new Date().getMilliseconds().toString(), html)
+          }
         }
 
         let pyodideReadyPromise = setupPyodide();
@@ -81,7 +115,7 @@
 
             window.globalMessage.query = queryTextArea.value;
             window.globalMessage.output = outputElement
-            outputElement.textContent=""
+            outputElement.textContent, msg = ""
 
             pyodide.runPythonAsync(`
               from js import globalMessage
@@ -91,7 +125,7 @@
 
             `)
         });
-    </script>
+    </script> -->
 </body>
 
 </html>
