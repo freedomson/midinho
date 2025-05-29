@@ -32,11 +32,10 @@ export class Query extends LitElement {
       let windowHeight = window.innerHeight;
       let docHeight = document.documentElement.scrollHeight;
       let atBottom = scrollTop + windowHeight >= docHeight;
+      this.msg += token;
+      const child = this.shadowRoot.querySelector('md-search');
+      child.writeResponse(this.msg)
       if (atBottom) {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
-        this.msg += token;
-        const child = this.shadowRoot.querySelector('md-search');
-        child.writeResponse(this.msg)
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
       }
     }
