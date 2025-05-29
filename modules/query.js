@@ -7,7 +7,7 @@ export class Query extends LitElement {
 
   static properties = {
     textarea: {type: Object},
-    disabled: {type: Boolean}
+    disabled: {type: Boolean},
   };
 
   constructor() {
@@ -28,9 +28,17 @@ export class Query extends LitElement {
 
   jsMsgCallback(token) {
     if (token) {
-      this.msg += token;
-      const child = this.shadowRoot.querySelector('md-search');
-      child.writeResponse(this.msg, this.userquery)
+      let scrollTop = window.scrollY || document.documentElement.scrollTop;
+      let windowHeight = window.innerHeight;
+      let docHeight = document.documentElement.scrollHeight;
+      let atBottom = scrollTop + windowHeight >= docHeight;
+      if (atBottom) {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
+        this.msg += token;
+        const child = this.shadowRoot.querySelector('md-search');
+        child.writeResponse(this.msg)
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
+      }
     }
   }
 
@@ -43,9 +51,9 @@ export class Query extends LitElement {
         import llm
         chain = llm.create_chain(jsMsgCallback)
         await chain.ainvoke({"query": llmUserQuery})
-        print("alive")
       `)
-      textarea.value=""
+      textarea.value = ""
+      this.disabled = true
   }
 
   render() {

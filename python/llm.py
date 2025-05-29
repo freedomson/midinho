@@ -8,7 +8,7 @@ class MyStreamingHandler(BaseCallbackHandler):
       self.msgCallbak = callback;
     def on_llm_new_token(self, token: str, **kwargs):
         self.msgCallbak(token)
-        print(token, end='', flush=True)
+        # print(token, end='', flush=True)
 
 def create_chain(callback):
     my_handler = MyStreamingHandler()

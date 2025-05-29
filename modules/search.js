@@ -1,19 +1,23 @@
-import { LitElement, html } from '/static/lit-core.min.js'
+import { LitElement, html, css } from '/static/lit-core.min.js'
 
 export class Search extends LitElement {
 
-  writeResponse(msg, query) {
+  static styles = css`
+    #chatBoxResponse {
+      font-size:0.5em !important;
+    }
+  `;
+
+  writeResponse(msg) {
     var converter = new showdown.Converter();
-    var html = converter.makeHtml(msg);
-    this.renderRoot.getElementById('chatBoxQuery').innerHTML = query
-    this.renderRoot.getElementById('chatBoxResponse').innerHTML = html
+    var msg = converter.makeHtml(msg);
+    this.renderRoot.getElementById('chatBoxResponse').innerHTML = msg
   }
 
   render() {
     return html`
       <link rel="stylesheet" href="static/pico.min.css">
-      <article id="chatBoxQuery">What can I help with?</article>
-      <article id="chatBoxResponse"></article>
+      <div id="chatBoxResponse"></div>
     `;
   }
 }
