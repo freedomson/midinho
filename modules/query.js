@@ -11,13 +11,16 @@ export class Query extends LitElement {
       padding: 0;
       margin: 0;
     }
-
+    #query-welcome {
+      text-align: center;
+      display: block;
+    }
     #query-response {
       margin-bottom: 160px;
       float: left;
     }
     #query-query {
-
+      margin-bottom: 0.5rem;
     }
     #query-container {
       transform: scale(0.75);
@@ -39,6 +42,7 @@ export class Query extends LitElement {
 
   constructor() {
     super();
+    this.messageWelcome = 'What can I help with?';
     this.placeholder = 'Ask anything';
     this.buttonText = 'Ask';
     this.disabled = true
@@ -46,9 +50,15 @@ export class Query extends LitElement {
     this.msgsRefs = []
   }
 
+  firstUpdated() {
+    this.textarea = this.renderRoot.getElementById('query-query');
+    this.textarea.focus();
+  }
+
   isEmptyAfterTrim(str) {
     return str.replace(/\s/g, '') === '';
   }
+
   handleKeyup(e) {
     this.userquery = e.target.value
     this.disabled = !e.target.value
@@ -89,7 +99,8 @@ export class Query extends LitElement {
 
   render() {
     return html`
-        <link rel="stylesheet" href="css/pico.min.css">
+        <link rel="stylesheet" href="css/pico.sand.min.css">
+        <small id="query-welcome">${this.messageWelcome}</small>
         <div id="query-response">
           ${this.msgs.map((msg, index) => html`
             <md-search
@@ -103,6 +114,8 @@ export class Query extends LitElement {
           <div id="query-container">
             <textarea
               id="query-query"
+              placeholder="${this.placeholder}"
+              aria-label="${this.placeholder}"
               @keyup=${this.handleKeyup}
             >${this.userquery}</textarea>
             ${ this.disabled ?

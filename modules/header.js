@@ -17,7 +17,7 @@ export class Header extends LitElement {
 
   render() {
     return html`
-      <link rel="stylesheet" href="css/pico.min.css">
+      <link rel="stylesheet" href="css/pico.sand.min.css">
       <h1 id="header">Private Ollama</h1>
     `;
   }

@@ -49,7 +49,7 @@ export class Search extends LitElement {
       <link rel="stylesheet" href="css/pico.min.css">
       <link rel="stylesheet" href="css/pico.colors.min.css">
       <div id="search-container">
-        <div id="search-query" class="pico-background-grey-50">${this.msg.query}</div>
+        <div id="search-query" class="pico-background-sand-50">${this.msg.query}</div>
         <div id="search-response"></div>
       </div>
     `;

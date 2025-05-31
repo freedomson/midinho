@@ -53,7 +53,7 @@ class App extends LitElement {
 
   render() {
     return html`
-      <link rel="stylesheet" href="css/pico.min.css">
+      <link rel="stylesheet" href="css/pico.sand.min.css">
       <div id="app-container-wrapper">
       <div id="app-container">
       ${this._loadPythonSourceCodeTask.render({
