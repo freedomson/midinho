@@ -23,6 +23,10 @@ export class Query extends LitElement {
     #query-query {
       margin-bottom: 0.5rem;
     }
+    #query-button {
+      width: 30vw;
+      float: left;
+    }
     #query-container {
       transform: scale(0.75);
     }
@@ -31,7 +35,7 @@ export class Query extends LitElement {
       bottom: 0;
       width: 60vw;
       height: 160px;
-      background: #FFF;
+      background-color: var(--pico-background-color);
     }
   `;
 
@@ -124,20 +128,14 @@ export class Query extends LitElement {
               aria-label="${this.placeholder}"
               @keyup=${this.handleKeyup}
             >${this.userquery}</textarea>
-            <div class="grid">
+            <fieldset class="group">
               ${ this.disabled ?
-                html`<div
-                        @click=${this.submitQuery}
-                        disabled type="submit">${this.buttonText}
-                      </div>`
+                html`<div id="query-button" @click=${this.submitQuery} disabled type="submit">${this.buttonText}</div>`
                 :
-                html`<div
-                        @click=${this.submitQuery}
-                        type="submit">${this.buttonText}
-                      </div>`
+                html`<div id="query-button" @click=${this.submitQuery} type="submit">${this.buttonText}</div>`
               }
               <md-query-models .ollamamodels=${this.ollamamodels}></md-query-models>
-            </div>
+            </fieldset>
           </div>
         </div>
     `;

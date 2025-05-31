@@ -7,8 +7,8 @@ export class Search extends LitElement {
     }
     #search-query {
       font-size: 0.7rem !important;
-      border-radius: 1rem;
-      padding: 1rem;
+      border-radius: 0.5rem;
+      padding: 0.5rem;
       display: inline;
       float: right;
     }
