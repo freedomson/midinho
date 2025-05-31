@@ -4,6 +4,7 @@ import { Task } from './node_modules/@lit/task/task.js';
 import { provide } from './node_modules/@lit-labs/context/index.js';
 import './query.js';
 import './header.js';
+import './error.js';
 import { pyodideContext } from './context.js';
 
 class App extends LitElement {
@@ -21,6 +22,20 @@ class App extends LitElement {
       width: 60vw;
     }
   `;
+
+  async getOllamaModels() {
+    try {
+      const response = await fetch('http://localhost:11434/api/tags');
+      if (!response.ok) throw new Error('ollama-connection-error-api');
+      const data = await response.json();
+      const modelNames = data.models.map(model => model.name);
+      console.log('Available models:', modelNames);
+      return modelNames;
+    } catch (error) {
+      console.error('Error fetching model list:', error);
+      throw new Error('ollama-connection-error-api');
+    }
+  }
 
   async setupPyodide() {
     this.pyodide = await loadPyodide();
@@ -46,7 +61,8 @@ class App extends LitElement {
   _loadPythonSourceCodeTask = new Task(this, {
     task: async ([], {signal}) => {
       // return;
-      await this.setupPyodide();
+      await this.getOllamaModels();
+      // await this.setupPyodide();
     },
     args: () => []
   });
@@ -68,7 +84,10 @@ class App extends LitElement {
               <md-header></md-header>
               <md-query></md-query>
         `,
-        error: (error) => html`<br /><p>Oops, something went wrong: ${error}</p>`,
+        error: (error) => html`
+          <md-header></md-header>
+          <md-error .error=${error}></md-error>
+        `,
       })}
       </div>
       </div>
