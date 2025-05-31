@@ -46,7 +46,7 @@ class App extends LitElement {
         initial: () => html`<p>Waiting to start task</p>`,
         pending: () => html`
         <link rel="stylesheet" href="static/pico.min.css">
-        <p align="center">Loading components</p>
+        <p align="center">Loading components...</p>
         <progress />
         `,
         complete: (value) => html`<md-page />`,

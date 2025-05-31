@@ -1,134 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PrivateGPT</title>
-    <link rel="stylesheet" href="static/pico.min.css">
+    <title>My PrivateGPT</title>
     <script src="static/showdown.min.js"></script>
     <script type="module" src="./modules/app.js"></script>
+    <script type="module" src="./modules/header.js"></script>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.28.0a2/full/pyodide.js"></script>
-</head>
-
-<body>
-  <style>
-    .container {
-      width: 60vw;
-    }
-  </style>
-  <!-- <script>
-    async function setupPyodide() {
-      let pyodide = await loadPyodide();
-      await pyodide.loadPackage("micropip");
-      const micropip = pyodide.pyimport("micropip");
-      await micropip.install('langchain==0.3.25')
-      await micropip.install('langchain_ollama==0.3.3')
-      await micropip.install('langchain_community==0.3.17')
-      await micropip.uninstall('httpx')
-      await pyodide.loadPackage('/static/httpx-0.28.1-py3-none-any.whl')
-      // pyodide.globals.set("output_callback", (token) => streamOutput(token));
-      // console.log(micropip.freeze())
-    }
-  </script> -->
-
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap">
+    <link rel="stylesheet" href="static/pico.min.css">
+  </head>
+  <body>
+    <style>
+      .container {
+        width: 60vw;
+      }
+    </style>
     <main class="container">
-      <hgroup>
-        <h1 style="text-align:center;">Get inspired with CSS</h1>
-      </hgroup>
-      <md-app />
+      <md-header></md-header>
+      <md-app></md-app>
     </main>
-
-    <!-- <main class="container">
-        <h1 style="text-align:center;">Code Runner Chatbot</h1>
-        <div id="output"></div>
-        <input id="query" placeholder="Ask a question about the dataset"></input>
-        <button id="ask-btn">Ask</button>
-    </main> -->
-    <!-- <script>
-      var converter = new showdown.Converter();
-        window.globalMessage = {}
-        const queryTextArea = document.getElementById('query');
-        const outputElement = document.getElementById('output');
-        const askBtn = document.getElementById('ask-btn');
-        var msg = ""
-
-        async function setupPyodide() {
-            let pyodide = await loadPyodide();
-            await pyodide.loadPackage("micropip");
-            const micropip = pyodide.pyimport("micropip");
-            await micropip.install('langchain==0.3.25')
-            await micropip.install('langchain_ollama==0.3.3')
-            await micropip.install('langchain_community==0.3.17')
-            await micropip.uninstall('httpx')
-            await pyodide.loadPackage('/static/httpx-0.28.1-py3-none-any.whl')
-            pyodide.globals.set("output_callback", (token) => streamOutput(token));
-            // console.log(micropip.freeze())
-
-            pyodide.runPythonAsync(`
-
-            from langchain.callbacks.base import BaseCallbackHandler
-            from langchain_core.output_parsers import StrOutputParser
-
-            class MyStreamingHandler(BaseCallbackHandler):
-                def on_llm_new_token(self, token: str, **kwargs):
-                    output_callback(token)
-                    print(token, end='', flush=True)
-
-            from langchain.chains import LLMChain
-            from langchain_ollama import ChatOllama
-            from langchain.prompts import PromptTemplate
-            from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-
-            my_handler = MyStreamingHandler()
-            prompt = PromptTemplate.from_template("Answer user query: {query}")
-
-            llm = ChatOllama(
-                model="llama3:latest",
-                streaming=True,
-                callbacks=[my_handler],
-                verbose=False
-            )
-
-            chain = prompt | llm | StrOutputParser()
-            `)
-
-            askBtn.ariaBusy = "false";
-            return pyodide;
-        }
-
-
-        function streamOutput(text) {
-          if (text) {
-            msg += text;
-            console.log("-"+msg+"-")
-            var html = converter.makeHtml(msg);
-            outputElement.innerHTML = html
-            console.log(new Date().getMilliseconds().toString(), html)
-          }
-        }
-
-        let pyodideReadyPromise = setupPyodide();
-
-        askBtn.addEventListener('click', async (event) => {
-
-            if (!pyodide)
-              var pyodide = await pyodideReadyPromise;
-
-            window.globalMessage.query = queryTextArea.value;
-            window.globalMessage.output = outputElement
-            outputElement.textContent, msg = ""
-
-            pyodide.runPythonAsync(`
-              from js import globalMessage
-              query=globalMessage.query
-              # query = "Give me a complete code example for a bot"
-              await chain.ainvoke({"query": query})
-
-            `)
-        });
-    </script> -->
-</body>
-
+  </body>
 </html>

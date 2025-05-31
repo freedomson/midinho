@@ -1,13 +1,22 @@
-import {LitElement, html} from '/static/lit-core.min.js'
+import {LitElement, html, css} from '/static/lit-core.min.js'
 import { consume } from 'https://esm.sh/@lit-labs/context';
 import { pyodideContext } from './context.js';
 import './search.js';
 
 export class Query extends LitElement {
 
+  static styles = css`
+    .container {
+      position: fixed;
+      bottom: 0;
+      width: 60vw;
+      min-height: 1vh;
+    }
+  `;
+
   static properties = {
     textarea: {type: Object},
-    disabled: {type: Boolean},
+    disabled: {type: Boolean}
   };
 
   constructor() {
@@ -26,32 +35,20 @@ export class Query extends LitElement {
     }
   }
 
-  jsMsgCallback(token) {
-    if (token) {
-      let scrollTop = window.scrollY || document.documentElement.scrollTop;
-      let windowHeight = window.innerHeight;
-      let docHeight = document.documentElement.scrollHeight;
-      let atBottom = scrollTop + windowHeight >= docHeight;
-      this.msg += token;
-      const child = this.shadowRoot.querySelector('md-search');
-      child.writeResponse(this.msg)
-      if (atBottom) {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
-      }
-    }
-  }
-
   submitQuery() {
-      const textarea = this.renderRoot.getElementById('textarea');
-      window.llmUserQuery = textarea.value;
-      this.pyodide.globals.set("jsMsgCallback", (token) => this.jsMsgCallback(token));
+      let responseEl = this.shadowRoot.querySelector('md-search')
+      let userQuery = this.renderRoot.getElementById('userQuery')
+      window.llmUserQuery = userQuery.value;
+      this.pyodide.globals.set(
+          "responseWriteCallback",
+          (token) => responseEl.write.bind(responseEl)(token));
       this.pyodide.runPythonAsync(`
         from js import llmUserQuery
         import llm
-        chain = llm.create_chain(jsMsgCallback)
+        chain = llm.create_chain(responseWriteCallback)
         await chain.ainvoke({"query": llmUserQuery})
       `)
-      textarea.value = ""
+      userQuery.value = ""
       this.disabled = true
   }
 
@@ -59,8 +56,9 @@ export class Query extends LitElement {
     return html`
       <link rel="stylesheet" href="static/pico.min.css">
       <md-search></md-search>
+      <main class="container">
       <textarea
-        id="textarea"
+        id="userQuery"
         placeholder="${this.placeholder}"
         aria-label="${this.placeholder}"
         @keyup=${this.handleKeyup}
@@ -76,6 +74,7 @@ export class Query extends LitElement {
                 type="submit">${this.buttonText}
               </button>`
       }
+      </main>
     `;
   }
 }
