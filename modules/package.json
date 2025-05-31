@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@lit-labs/context": "^0.5.1",
+    "@lit/task": "^1.0.2",
+    "lit-element": "^4.2.0",
+    "lit-html": "^3.3.0"
+  }
+}

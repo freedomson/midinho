@@ -1,15 +1,12 @@
-import { LitElement, html, css } from '/static/lit-core.min.js'
+import { LitElement, html, css } from './node_modules/lit-element/lit-element.js'
 
 export class Header extends LitElement {
 
   static styles = css`
-    #lettering {
-      top: 1em
-      display: fixed;
-    }
+
     #header {
       text-align: center;
-      display: block;
+      padding: 1rem;
     }
     h1 {
       --pico-font-family: Pacifico, cursive;
@@ -20,10 +17,8 @@ export class Header extends LitElement {
 
   render() {
     return html`
-      <link rel="stylesheet" href="static/pico.min.css">
-      <hgroup id="lettering">
-        <h1 id="header">Private Ollama</h1>
-      </hgroup>
+      <link rel="stylesheet" href="css/pico.min.css">
+      <h1 id="header">Private Ollama</h1>
     `;
   }
 }

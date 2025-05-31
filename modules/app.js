@@ -1,8 +1,9 @@
 
-import { LitElement, html } from '/static/lit-core.min.js'
-import { Task } from 'https://cdn.jsdelivr.net/npm/@lit/task@1.0.2/+esm'
-import { provide } from 'https://esm.sh/@lit-labs/context';
-import './page.js';
+import { LitElement, html, css } from './node_modules/lit-element/lit-element.js'
+import { Task } from './node_modules/@lit/task/task.js';
+import { provide } from './node_modules/@lit-labs/context/index.js';
+import './query.js';
+import './header.js';
 import { pyodideContext } from './context.js';
 
 class App extends LitElement {
@@ -10,6 +11,16 @@ class App extends LitElement {
   static properties = {
     pyodide: {type: Object},
   };
+
+  static styles = css`
+    #app-container-wrapper {
+      width: 100vw;
+      padding-left: 20vw;
+    }
+    #app-container {
+      width: 60vw;
+    }
+  `;
 
   async setupPyodide() {
     this.pyodide = await loadPyodide();
@@ -42,16 +53,25 @@ class App extends LitElement {
 
   render() {
     return html`
+      <link rel="stylesheet" href="css/pico.min.css">
+      <div id="app-container-wrapper">
+      <div id="app-container">
       ${this._loadPythonSourceCodeTask.render({
-        initial: () => html`<p>Waiting to start task</p>`,
+        initial: () => html`<br /><p>Waiting to start task</p>`,
         pending: () => html`
-        <link rel="stylesheet" href="static/pico.min.css">
-        <p align="center">Loading components...</p>
-        <progress />
+          <br />
+          <md-header></md-header>
+          <p align="center">Loading components...</p>
+          <progress />
+          `,
+        complete: (value) => html`
+              <md-header></md-header>
+              <md-query></md-query>
         `,
-        complete: (value) => html`<md-page />`,
-        error: (error) => html`<p>Oops, something went wrong: ${error}</p>`,
+        error: (error) => html`<br /><p>Oops, something went wrong: ${error}</p>`,
       })}
+      </div>
+      </div>
     `;
   }
 }

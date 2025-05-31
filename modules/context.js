@@ -1,3 +1,2 @@
-import { provide, consume, createContext } from 'https://esm.sh/@lit-labs/context';
-
+import { provide, consume, createContext } from './node_modules/@lit-labs/context/index.js';
 export const pyodideContext = createContext('pyodide');
