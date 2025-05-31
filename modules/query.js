@@ -1,8 +1,9 @@
 import {LitElement, html, css} from './node_modules/lit-element/lit-element.js'
 import { ref, createRef } from './node_modules/lit-html/directives/ref.js';
 import { consume } from './node_modules/@lit-labs/context/index.js';
-import { pyodideContext } from './context.js';
+import { pyodideContext, ollamamodelsContext } from './context.js';
 import './search.js';
+import './query-models.js';
 
 export class Query extends LitElement {
 
@@ -68,6 +69,10 @@ export class Query extends LitElement {
   }
 
   submitQuery() {
+
+      let mdQueryModels = this.shadowRoot.querySelector('md-query-models');
+      let selectedModel = mdQueryModels.getSelected.bind(mdQueryModels)();
+
       let queryEl = this.renderRoot.getElementById('query-query')
       let msg = {
         id: this.msgs.length,
@@ -81,16 +86,17 @@ export class Query extends LitElement {
       setTimeout(()=>{
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
         let msgEl = this.msgsRefs[(msg.id)].value
-        window.pythonQueryEl = msg.query;
-        // msgEl.write.bind(msgEl)("Test")
+        window.pythonQueryStr = msg.query;
+        window.pythonSelectedModel = selectedModel
+        // msgEl.write.bind(msgEl)(window.pythonSelectedModel)
         this.pyodide.globals.set(
             "responseWriteCallback",
             (token) => msgEl.write.bind(msgEl)(token));
         this.pyodide.runPythonAsync(`
-          from js import pythonQueryEl
+          from js import pythonQueryStr, pythonSelectedModel
           import llm
-          chain = llm.create_chain(responseWriteCallback)
-          await chain.ainvoke({"query": pythonQueryEl})
+          chain = llm.create_chain(pythonSelectedModel, responseWriteCallback)
+          await chain.ainvoke({"query": pythonQueryStr})
         `)
         queryEl.value = ""
         this.disabled = true
@@ -118,21 +124,25 @@ export class Query extends LitElement {
               aria-label="${this.placeholder}"
               @keyup=${this.handleKeyup}
             >${this.userquery}</textarea>
-            ${ this.disabled ?
-              html`<div
-                      @click=${this.submitQuery}
-                      disabled type="submit">${this.buttonText}
-                    </div>`
-              :
-              html`<div
-                      @click=${this.submitQuery}
-                      type="submit">${this.buttonText}
-                    </div>`
-            }
+            <div class="grid">
+              ${ this.disabled ?
+                html`<div
+                        @click=${this.submitQuery}
+                        disabled type="submit">${this.buttonText}
+                      </div>`
+                :
+                html`<div
+                        @click=${this.submitQuery}
+                        type="submit">${this.buttonText}
+                      </div>`
+              }
+              <md-query-models .ollamamodels=${this.ollamamodels}></md-query-models>
+            </div>
           </div>
         </div>
     `;
   }
 }
+consume({ context: ollamamodelsContext })(Query.prototype, 'ollamamodels');
 consume({ context: pyodideContext })(Query.prototype, 'pyodide');
 customElements.define('md-query', Query);

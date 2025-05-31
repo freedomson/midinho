@@ -10,12 +10,12 @@ class MyStreamingHandler(BaseCallbackHandler):
         self.msgCallbak(token)
         # print(token, end='', flush=True)
 
-def create_chain(callback):
+def create_chain(model, callback):
     my_handler = MyStreamingHandler()
     my_handler.setMsgCallback(callback)
     prompt = PromptTemplate.from_template("Answer user query: {query}")
     llm = ChatOllama(
-        model="llama3:latest",
+        model=model, # "llama3:latest",
         streaming=True,
         callbacks=[my_handler],
         verbose=False

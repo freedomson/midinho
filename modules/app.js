@@ -5,12 +5,13 @@ import { provide } from './node_modules/@lit-labs/context/index.js';
 import './query.js';
 import './header.js';
 import './error.js';
-import { pyodideContext } from './context.js';
+import { pyodideContext, ollamamodelsContext } from './context.js';
 
 class App extends LitElement {
 
   static properties = {
     pyodide: {type: Object},
+    ollamamodels: {type: Object}
   };
 
   static styles = css`
@@ -30,6 +31,7 @@ class App extends LitElement {
       const data = await response.json();
       const modelNames = data.models.map(model => model.name);
       console.log('Available models:', modelNames);
+      this.ollamamodels = modelNames;
       return modelNames;
     } catch (error) {
       console.error('Error fetching model list:', error);
@@ -62,7 +64,7 @@ class App extends LitElement {
     task: async ([], {signal}) => {
       // return;
       await this.getOllamaModels();
-      // await this.setupPyodide();
+      await this.setupPyodide();
     },
     args: () => []
   });
@@ -95,4 +97,5 @@ class App extends LitElement {
   }
 }
 provide({ context: pyodideContext })(App.prototype, 'pyodide');
+provide({ context: ollamamodelsContext })(App.prototype, 'ollamamodels');
 customElements.define('md-app', App);
