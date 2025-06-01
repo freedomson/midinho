@@ -48,8 +48,7 @@ class App extends LitElement {
     await micropip.install('langchain_ollama==0.3.3')
     await micropip.install('langchain_community==0.3.17')
     await micropip.uninstall('httpx')
-    await this.pyodide.loadPackage('/static/httpx-0.28.1-py3-none-any.whl')
-    // pyodide.globals.set("output_callback", (token) => streamOutput(token));
+    await this.pyodide.loadPackage('../static/httpx-0.28.1-py3-none-any.whl')
     // console.log(micropip.freeze())
     await this.pyodide.runPythonAsync(`
       from pyodide.http import pyfetch
