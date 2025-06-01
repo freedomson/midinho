@@ -15,6 +15,7 @@ export class Query extends LitElement {
     #query-welcome {
       text-align: center;
       display: block;
+      margin-bottom: 1rem;
     }
     #query-response {
       margin-bottom: 160px;
@@ -97,10 +98,16 @@ export class Query extends LitElement {
             "responseWriteCallback",
             (token) => msgEl.write.bind(msgEl)(token));
         this.pyodide.runPythonAsync(`
+          from langchain_core.messages import HumanMessage, AIMessage
           from js import pythonQueryStr, pythonSelectedModel
           import llm
-          chain = llm.create_chain(pythonSelectedModel, responseWriteCallback)
-          await chain.ainvoke({"query": pythonQueryStr})
+          try:
+            chain = llm.create_chain(pythonSelectedModel, responseWriteCallback)
+            llm.chat_history.append(HumanMessage(content=pythonQueryStr))
+            response = await chain.ainvoke(llm.chat_history)
+            llm.chat_history.append(AIMessage(content=response))
+          except Exception as e:
+              print("Caught a generic exception:", e)
         `)
         queryEl.value = ""
         this.disabled = true

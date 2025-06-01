@@ -10,6 +10,8 @@ class MyStreamingHandler(BaseCallbackHandler):
         self.msgCallbak(token)
         # print(token, end='', flush=True)
 
+chat_history = []
+
 def create_chain(model, callback):
     my_handler = MyStreamingHandler()
     my_handler.setMsgCallback(callback)
@@ -20,5 +22,4 @@ def create_chain(model, callback):
         callbacks=[my_handler],
         verbose=False
     )
-
     return prompt | llm | StrOutputParser()
