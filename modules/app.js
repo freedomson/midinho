@@ -50,9 +50,10 @@ class App extends LitElement {
     await micropip.uninstall('httpx')
     await this.pyodide.loadPackage('./static/httpx-0.28.1-py3-none-any.whl')
     // console.log(micropip.freeze())
+    // To host in github the path must have the repo name
     await this.pyodide.runPythonAsync(`
       from pyodide.http import pyfetch
-      response = await pyfetch("../python/llm.py")
+      response = await pyfetch("midinho/python/llm.py")
       with open("llm.py", "wb") as f:
           f.write(await response.bytes())
     `)
