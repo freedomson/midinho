@@ -52,7 +52,7 @@ class App extends LitElement {
     // console.log(micropip.freeze())
     await this.pyodide.runPythonAsync(`
       from pyodide.http import pyfetch
-      response = await pyfetch("/python/llm.py")
+      response = await pyfetch("./python/llm.py")
       with open("llm.py", "wb") as f:
           f.write(await response.bytes())
     `)
