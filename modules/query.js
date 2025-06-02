@@ -98,14 +98,10 @@ export class Query extends LitElement {
             "responseWriteCallback",
             (token) => msgEl.write.bind(msgEl)(token));
         this.pyodide.runPythonAsync(`
-          from langchain_core.messages import HumanMessage, AIMessage
           from js import pythonQueryStr, pythonSelectedModel
           import llm
           try:
-            chain = llm.create_chain(pythonSelectedModel, responseWriteCallback)
-            llm.chat_history.append(HumanMessage(content=pythonQueryStr))
-            response = await chain.ainvoke(llm.chat_history)
-            llm.chat_history.append(AIMessage(content=response))
+            await llm.run_query(pythonQueryStr, pythonSelectedModel, responseWriteCallback)
           except Exception as e:
               print("Caught a generic exception:", e)
         `)

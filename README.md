@@ -116,7 +116,7 @@ A **fully offline**, secure, and open-source chatbot built with:
 2. **Serve Live LLM Chat Bot with Python**
    ```bash
       cd static
-      python -m http.server 8000
+      python server.py
 2. **🧪 Open Live Example UI** \
 👉 [http://localhost:8000/](http://localhost:8000/)
 

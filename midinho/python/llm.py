@@ -1,7 +1,7 @@
 from langchain.callbacks.base import BaseCallbackHandler
-from langchain_core.output_parsers import StrOutputParser
 from langchain_ollama import ChatOllama
 from langchain.prompts import PromptTemplate
+from langchain_core.messages import HumanMessage, AIMessage
 
 class MyStreamingHandler(BaseCallbackHandler):
     def setMsgCallback(self, callback):
@@ -22,4 +22,12 @@ def create_chain(model, callback):
         callbacks=[my_handler],
         verbose=False
     )
-    return prompt | llm | StrOutputParser()
+    return llm
+
+async def run_query(user_query, pythonSelectedModel, responseWriteCallback):
+  user_prompt = PromptTemplate.from_template("Answer user query: {query}")
+  formatted_query = user_prompt.format(query=user_query)
+  chat_history.append(HumanMessage(content=formatted_query))
+  chain = create_chain(pythonSelectedModel, responseWriteCallback)
+  response = await chain.ainvoke(chat_history)
+  chat_history.append(AIMessage(content=response.content))
