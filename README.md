@@ -30,7 +30,7 @@ A **fully offline**, secure, and open-source chatbot built with:
 | Component      | Technology                                     | Role                                                   |
 |----------------|------------------------------------------------|--------------------------------------------------------|
 | 🧠 LLM Engine   | [Ollama](https://ollama.com)                  | Serves LLM models locally (e.g., Mistral, LLaMA, etc.) |
-| ⚛️ Frontend UI  | [Lit](https://lit.dev)                        | Creates modern, reactive web components                |
+| ⚛️ Frontend UI  | [Lit](https://lit.dev) + [Pico CSS](https://picocss.com)                        | Creates modern, reactive web components                |
 | 🔗 LLM Pipeline | [Langchain](https://www.langchain.com) + [Pyodide](https://pyodide.org) | Enables Python-based logic and toolchains in-browser   |
 | 🌐 Runtime      | Pyodide + WebAssembly                          | Runs Python Langchain in the browser, no server needed |
 

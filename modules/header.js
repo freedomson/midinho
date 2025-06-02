@@ -8,6 +8,10 @@ export class Header extends LitElement {
       text-align: center;
       padding: 1rem;
     }
+    #github-logo {
+      margin:0;
+      padding:0;
+    }
     h1 {
       --pico-font-family: Pacifico, cursive;
       --pico-font-weight: 400;
@@ -18,7 +22,7 @@ export class Header extends LitElement {
   render() {
     return html`
       <link rel="stylesheet" href="css/pico.sand.min.css">
-      <h1 id="header">Private Ollama</h1>
+        <h1 id="header">Private Ollama <a alt="Github" href="https://github.com/freedomson/midinho"><img id="github-logo" width="20" src="./css/github.png"></a></h1>
     `;
   }
 }
