@@ -40,24 +40,42 @@ class App extends LitElement {
   }
 
   async setupPyodide() {
-    this.pyodide = await loadPyodide();
+    this.pyodide = await loadPyodide({
+      indexURL : './pyodide/',
+      stdLibURL: './pyodide/python_stdlib.zip'
+    });
     await this.pyodide.loadPackage("micropip");
     const micropip = this.pyodide.pyimport("micropip");
+
     await micropip.install("anyio")
-    await micropip.install('langchain==0.3.25')
-    await micropip.install('langchain_ollama==0.3.3')
-    await micropip.install('langchain_community==0.3.17')
-    await micropip.uninstall('httpx')
-    await this.pyodide.loadPackage('./static/httpx-0.28.1-py3-none-any.whl')
+    await micropip.install("requests")
+    await micropip.install("pydantic")
+    await micropip.install("zstandard")
+
+    await this.pyodide.loadPackage('./wasm/jsonpatch-1.33-py2.py3-none-any.whl');
+    await this.pyodide.loadPackage('./wasm/jsonpointer-3.0.0-py2.py3-none-any.whl');
+    await this.pyodide.loadPackage('./wasm/pyyaml-6.0.2-cp313-cp313-pyodide_2025_0_wasm32.whl');
+    await this.pyodide.loadPackage('./wasm/sqlalchemy-2.0.39-cp313-cp313-pyodide_2025_0_wasm32.whl');
+    await this.pyodide.loadPackage('./wasm/sqlite3-1.0.0-cp313-cp313-pyodide_2025_0_wasm32.whl');
+    await this.pyodide.loadPackage('./wasm/ollama-0.5.1-py3-none-any.whl');
+    await this.pyodide.loadPackage('./wasm/langsmith-0.3.44-py3-none-any.whl');
+    await this.pyodide.loadPackage('./wasm/langchain_text_splitters-0.3.8-py3-none-any.whl');
+    await this.pyodide.loadPackage('./wasm/langchain_core-0.3.63-py3-none-any.whl');
+    await this.pyodide.loadPackage('./wasm/requests_toolbelt-1.0.0-py2.py3-none-any.whl');
+    await this.pyodide.loadPackage('./wasm/tenacity-9.1.2-py3-none-any.whl');
+    await this.pyodide.loadPackage('./wasm/langchain_ollama-0.3.3-py3-none-any.whl');
+    await this.pyodide.loadPackage('./wasm/langchain-0.3.25-py3-none-any.whl');
+
+    await this.pyodide.loadPackage('./static/httpx-0.28.1-py3-none-any.whl');
+
     // console.log(micropip.freeze())
-    // To host in github the path must have the repo name
     await this.pyodide.runPythonAsync(`
       from pyodide.http import pyfetch
       response = await pyfetch("midinho/python/llm.py")
       with open("llm.py", "wb") as f:
           f.write(await response.bytes())
     `)
-    this.pyodide.pyimport("llm");
+
   }
 
   _loadPythonSourceCodeTask = new Task(this, {
