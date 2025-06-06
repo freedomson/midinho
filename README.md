@@ -125,7 +125,6 @@ A **fully offline**, secure, and open-source chatbot built with:
 💬 Request features or report issues:\
 👉 [GitHub Issues](https://github.com/freedomson/midinho/issues)
 
-
 ## 📄 License
 
 Private Ollama is open source and respects your digital freedom.
