@@ -1,9 +1,9 @@
 import {LitElement, html, css} from './node_modules/lit-element/lit-element.js'
 import { ref, createRef } from './node_modules/lit-html/directives/ref.js';
-import { consume } from './node_modules/@lit-labs/context/index.js';
-import { pyodideContext, ollamamodelsContext } from './context.js';
 import './search.js';
 import './query-models.js';
+import { pyodideContext } from './context.js';
+import { consume } from './node_modules/@lit-labs/context/index.js';
 
 export class Query extends LitElement {
 
@@ -29,7 +29,7 @@ export class Query extends LitElement {
       float: left;
     }
     #query-container {
-      transform: scale(0.75);
+
     }
     #query-container-wrapper{
       position: fixed;
@@ -73,11 +73,13 @@ export class Query extends LitElement {
     }
   }
 
+  getSelectedModel() {
+    let mdQueryModels = this.shadowRoot.querySelector('md-query-models');
+    return mdQueryModels.getSelectedModel.bind(mdQueryModels)();
+  }
+
   submitQuery() {
-
-      let mdQueryModels = this.shadowRoot.querySelector('md-query-models');
-      let selectedModel = mdQueryModels.getSelected.bind(mdQueryModels)();
-
+      let selectedModel = this.getSelectedModel()
       let queryEl = this.renderRoot.getElementById('query-query')
       let msg = {
         id: this.msgs.length,
@@ -122,7 +124,8 @@ export class Query extends LitElement {
               ></md-search>
           `)}
         </div>
-        <div id="query-container-wrapper" aling="center">
+        <div
+          id="query-container-wrapper" >
           <hr class="pico-background-grey-50" />
           <div id="query-container">
             <textarea
@@ -137,13 +140,12 @@ export class Query extends LitElement {
                 :
                 html`<div id="query-button" @click=${this.submitQuery} type="submit">${this.buttonText}</div>`
               }
-              <md-query-models .ollamamodels=${this.ollamamodels}></md-query-models>
+              <md-query-models></md-query-models>
             </fieldset>
           </div>
         </div>
     `;
   }
 }
-consume({ context: ollamamodelsContext })(Query.prototype, 'ollamamodels');
 consume({ context: pyodideContext })(Query.prototype, 'pyodide');
 customElements.define('md-query', Query);

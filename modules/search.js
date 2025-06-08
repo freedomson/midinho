@@ -4,16 +4,15 @@ export class Search extends LitElement {
 
   static styles = css`
     #search-container {
+      font-size: 1rem;
     }
     #search-query {
-      font-size: 0.7rem !important;
       border-radius: 0.5rem;
       padding: 0.5rem;
       display: inline;
       float: right;
     }
     #search-response {
-      font-size: 0.7rem !important;
       border-radius: 1rem;
       padding: 1rem;
       width: 60vw;
