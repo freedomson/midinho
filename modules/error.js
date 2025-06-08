@@ -51,7 +51,13 @@ export class Error extends LitElement {
         </article>
         <article>
           <h1>Step 2</h1>
-          <small>Start Ollama manually!</small>
+          <small>
+            Start Ollama manually!
+            <br/>
+            <mark>
+              First stop Ollama service then run one of the above instruction on your favorite terminal!
+            </mark>
+          </small>
           <br/>
           <br/>
           <div>
@@ -62,10 +68,10 @@ export class Error extends LitElement {
                   <path d="M0 93.7l183.6-25.3v177.4H0V93.7zm0 324.6l183.6 25.3V268.4H0v149.9zm203.8 28L448 480V268.4H203.8v177.9zm0-380.6v180.1H448V32L203.8 65.7z"></path>
                 </svg>
               </div>
-                Windows Power Shell
+                Windows Power Shell (admin)
               </summary>
               <div class="pico-background-grey-50">
-                env:OLLAMA_ORIGINS="https://freedomson.github.io"; ollama serve
+                $env:OLLAMA_ORIGINS="https://freedomson.github.io"; ollama serve
               </div>
               <br/>
             </div>
@@ -97,7 +103,15 @@ export class Error extends LitElement {
               </div>
             </div>
           </div>
-        </div>
+        </article>
+        <article>
+          <h1>Step 3</h1>
+          <small>
+            Ollama should be running on your favorite terminal.
+            <br/>
+            Please reload page <a href="">here</a>!
+          </small>
+        </article>
         </br>
       </div>
     `;

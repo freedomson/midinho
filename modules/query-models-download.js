@@ -43,7 +43,7 @@ export class QueryModelsDownload extends LitElement {
     this.downloadingProgressStatusProgress = "";
     this.defaultModels = [
       {
-        "name": "wizard-math:7b",
+        "name": "mathstral:7b",
         "size":  4.1 * 1024 * 1024 * 1024,
         "context": "32K",
         "input": ["text"]
@@ -54,32 +54,26 @@ export class QueryModelsDownload extends LitElement {
         "context": "32K",
         "input": ["text","image"]
       },
+      // {
+      //   "name": "smollm:135m",
+      //   "size": 0.092 * 1024 * 1024 * 1024,
+      //   "context": "2K",
+      //   "input": ["text"]
+      // },
+      // {
+      //   "name": "smollm2:135m",
+      //   "size": 0.271 * 1024 * 1024 * 1024,
+      //   "context": "8K",
+      //   "input": ["text"]
+      // },
       {
-        "name": "granite3.2-vision",
-        "size": 2.4 * 1024 * 1024 * 1024,
-        "context": "16K",
-        "input": ["text","image"]
-      },
-      {
-        "name": "smollm:135m",
-        "size": 0.092 * 1024 * 1024 * 1024,
-        "context": "2K",
-        "input": ["text"]
-      },
-      {
-        "name": "smollm2:135m",
-        "size": 0.271 * 1024 * 1024 * 1024,
-        "context": "8K",
-        "input": ["text"]
-      },
-      {
-        "name": "deepseek-r1:7b",
+        "name": "deepseek-r1:8b",
         "size": 5.2 * 1024 * 1024 * 1024,
         "context": "128K",
         "input": ["text"]
       },
       {
-        "name": "llama3.1:latest",
+        "name": "llama3.1:8b",
         "size": 4.9 * 1024 * 1024 * 1024,
         "context": "128K",
         "input": ["text"]
@@ -91,9 +85,21 @@ export class QueryModelsDownload extends LitElement {
         "input": ["text"]
       },
       {
-        "name": "qwen2.5-coder:7b",
-        "size": 4.7 * 1024 * 1024 * 1024,
-        "context": "32K",
+        "name": "deepseek-r1:14b",
+        "size": 9.0 * 1024 * 1024 * 1024,
+        "context": "128K",
+        "input": ["text"]
+      },
+      {
+        "name": "gemma3:4b",
+        "size": 3.3 * 1024 * 1024 * 1024,
+        "context": "128K",
+        "input": ["text", "image"]
+      },
+      {
+        "name": "qwen3:8b",
+        "size":  5.2 * 1024 * 1024 * 1024,
+        "context": "40K",
         "input": ["text"]
       }
     ];
@@ -215,8 +221,34 @@ export class QueryModelsDownload extends LitElement {
     }
   }
 
+  mergeArray(arr1,arr2){
+    const merged = [...arr1,...arr2];
+
+    arr2.forEach(item2 => {
+      const index = merged.findIndex(item1 => item1.id === item2.id);
+      if (index >= 0) {
+        // Fill missing/empty values
+        for (let key in item2) {
+          if (
+            merged[index][key] === undefined ||
+            merged[index][key] === null ||
+            merged[index][key] === ""
+          ) {
+            merged[index][key] = item2[key];
+          }
+        }
+      } else {
+        // Add new object if not in arr1
+        merged.push(item2);
+      }
+    });
+    return merged;
+  }
+
   getModels(){
-    return this.defaultModels.sort((a, b) => a.name.localeCompare(b.name));
+    const a = this.mergeArray(OllamaApi.models, this.defaultModels)
+    const u = Array.from(new Map(a.map(item => [item.name, item])).values());
+    return u.sort((a, b) => a.name.localeCompare(b.name))
   }
 
   render() {
@@ -274,8 +306,8 @@ export class QueryModelsDownload extends LitElement {
                       <a href="https://ollama.com/library/${model.name}">${model.name}</a>
                     </th>
                     <td>${this.roundTo2Decimals(model.size / 1024 / 1024 / 1024)} GB</td>
-                    <td>${model.context}</td>
-                    <td>${model.input ? model.input.join(", ") : ""}</td>
+                    <td>${model.context ? model.context : "n.a."}</td>
+                    <td>${model.input ? model.input.join(", ") : "n.a."}</td>
                     <td>
                         ${
                           !OllamaApi.models.some(current => current.name === model.name) ?

@@ -12,6 +12,8 @@ class MyStreamingHandler(BaseCallbackHandler):
 
 chat_history = []
 
+timeout = 360
+
 def create_chain(model, callback):
     my_handler = MyStreamingHandler()
     my_handler.setMsgCallback(callback)
@@ -20,7 +22,9 @@ def create_chain(model, callback):
         model=model, # "llama3:latest",
         streaming=True,
         callbacks=[my_handler],
-        verbose=False
+        verbose=False,
+        keep_alive="1m",
+        timeout=timeout
     )
     return llm
 
@@ -29,5 +33,5 @@ async def run_query(user_query, pythonSelectedModel, responseWriteCallback):
   formatted_query = user_prompt.format(query=user_query)
   chat_history.append(HumanMessage(content=formatted_query))
   chain = create_chain(pythonSelectedModel, responseWriteCallback)
-  response = await chain.ainvoke(chat_history)
+  response = await chain.ainvoke(chat_history, config={"timeout": timeout})
   chat_history.append(AIMessage(content=response.content))

@@ -82,7 +82,7 @@ export class QueryModels extends LitElement {
           required>
           ${
           this.hasModel() &&  !this.showDownloadModel ?
-            this.ollamamodels.map((model, index) => html`
+            this.ollamamodels.sort().map((model, index) => html`
               <option ${index==0?"selected":""} value="${model}">${model}</option>
             `)
           :
