@@ -13,6 +13,7 @@ class MyStreamingHandler(BaseCallbackHandler):
 chat_history = []
 
 timeout = 360
+keepalive = "10m"
 
 def create_chain(model, callback):
     my_handler = MyStreamingHandler()
@@ -23,7 +24,7 @@ def create_chain(model, callback):
         streaming=True,
         callbacks=[my_handler],
         verbose=False,
-        keep_alive="1m",
+        keep_alive=keepalive,
         timeout=timeout
     )
     return llm

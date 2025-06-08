@@ -22,7 +22,8 @@ export class Header extends LitElement {
   render() {
     return html`
       <link rel="stylesheet" href="css/pico.sand.min.css">
-      <h1 id="header">Midinho</h1>
+      <h1 id="header">Midinho, a Private Ollama</h1>
+      </footer>
     `;
   }
 }
