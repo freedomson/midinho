@@ -73,6 +73,9 @@ class App extends LitElement {
       response = await pyfetch("midinho/python/llm.py")
       with open("llm.py", "wb") as f:
           f.write(await response.bytes())
+
+      # Preload classes
+      import llm
     `)
 
   }

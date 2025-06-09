@@ -11,6 +11,7 @@ class OllamaApi {
 
   getEndpointByOperation(operation) {
     switch (operation) {
+      case "generate":
       case "tags":
       case "pull":
       case "delete":

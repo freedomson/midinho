@@ -66,9 +66,13 @@ export class Query extends LitElement {
   }
 
   handleKeyup(e) {
+    if (this.isEmptyAfterTrim(e.target.value)){
+      e.target.value = ""
+      return;
+    }
     this.userquery = e.target.value
     this.disabled = !e.target.value
-    if ( !this.isEmptyAfterTrim(this.userquery) && e.keyCode == 13 && !e.shiftKey ) {
+    if ( e.keyCode == 13 && !e.shiftKey ) {
       this.submitQuery()
     }
   }
@@ -78,38 +82,54 @@ export class Query extends LitElement {
     return mdQueryModels.getSelectedModel.bind(mdQueryModels)();
   }
 
-  submitQuery() {
+  async submitQuery() {
+
+      // Construct message
       let selectedModel = this.getSelectedModel()
       let queryEl = this.renderRoot.getElementById('query-query')
       let msg = {
         id: this.msgs.length,
         query: queryEl.value,
+        model: selectedModel,
         response: ""
       }
 
       this.msgs = [...this.msgs, msg];
-      this.msgsRefs = this.msgs.map(() => createRef());
 
-      setTimeout(()=>{
+      // Set bridge vars
+      window.pythonQueryStr = msg.query;
+      window.pythonSelectedModel = selectedModel
+
+      // Update UI with message
+      await this.requestUpdate();
+
+      let msgEl = this.renderRoot.getElementById(`md-search-${this.msgs.length}`);
+
+      setTimeout(() => {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
-        let msgEl = this.msgsRefs[(msg.id)].value
-        window.pythonQueryStr = msg.query;
-        window.pythonSelectedModel = selectedModel
-        // msgEl.write.bind(msgEl)(window.pythonSelectedModel)
-        this.pyodide.globals.set(
-            "responseWriteCallback",
-            (token) => msgEl.write.bind(msgEl)(token));
-        this.pyodide.runPythonAsync(`
-          from js import pythonQueryStr, pythonSelectedModel
-          import llm
-          try:
-            await llm.run_query(pythonQueryStr, pythonSelectedModel, responseWriteCallback)
-          except Exception as e:
-              print("Caught a generic exception:", e)
-        `)
-        queryEl.value = ""
-        this.disabled = true
-      }, 0)
+      }, 0);
+
+      this.pyodide.globals.set(
+        "callback",
+        (token) => msgEl.write.bind(msgEl)(token));
+
+
+
+      this.pyodide.globals.set(
+        "donecallback",
+        () => msgEl.end.bind(msgEl)());
+
+      this.pyodide.runPythonAsync(`
+        from js import pythonQueryStr, pythonSelectedModel
+        try:
+          await llm.run_query(pythonQueryStr, pythonSelectedModel, callback, donecallback)
+        except Exception as e:
+            print("Caught a generic exception:", e)
+      `)
+
+      queryEl.value = ""
+      this.disabled = true
+
   }
 
   render() {
@@ -119,7 +139,7 @@ export class Query extends LitElement {
         <div id="query-response">
           ${this.msgs.map((msg, index) => html`
             <md-search
-              ${ref(this.msgsRefs[index])}
+              id="md-search-${index+1}"
               .msg=${msg}
               ></md-search>
           `)}

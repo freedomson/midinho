@@ -2,6 +2,7 @@ import { LitElement, html, css } from './node_modules/lit-element/lit-element.js
 import './query-models-download.js';
 import { consume } from './node_modules/@lit-labs/context/index.js';
 import { ollamamodelsContext } from './context.js';
+import OllamaApi from './api.js';
 export class QueryModels extends LitElement {
 
   static styles = css`
@@ -20,7 +21,8 @@ export class QueryModels extends LitElement {
   `;
 
   static properties = {
-    ollamamodels: {type: Object}
+    ollamamodels: {type: Object},
+    preloadModelStatus: {type: Array}
   };
 
   hasModel() {
@@ -31,6 +33,7 @@ export class QueryModels extends LitElement {
     super();
     this.textSelectModel = 'Please select LLM';
     this.showDownloadModel = false
+    this.preloadModelStatus = []
   }
 
   toggleDownloadModel(){
@@ -74,11 +77,63 @@ export class QueryModels extends LitElement {
     `
   }
 
+  async preloadModel() {
+    const model = this.getSelectedModel()
+    const found = this.preloadModelStatus.includes(model);
+    if (found) {
+      console.log(`Model ${model} was already preloaded.`)
+      return;
+    } else {
+      console.log(`Model ${model} will be preloaded.`)
+      this.preloadModelStatus.push(model)
+    }
+
+    try {
+      const response = await fetch(OllamaApi.getEndpointByOperation("generate"), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: model,
+          prompt: '',
+          keep_alive: '10m'
+        })
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      let result = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        // const chunk = decoder.decode(value);
+        // result += chunk;
+        // console.log(result)
+      }
+
+      console.log(`Model ${model} preloaded successfully.`);
+
+    } catch (err) {
+      console.error('Error:', err);
+    }
+  }
+
+  onChange() {
+    this.preloadModel()
+  }
+
+  firstUpdated() {
+    this.preloadModel()
+  }
+
   renderModelList() {
     return html `
       <select
           id="ollamamodel"
           aria-label="${this.textSelectModel}"
+          @change=${this.onChange}
           required>
           ${
           this.hasModel() &&  !this.showDownloadModel ?

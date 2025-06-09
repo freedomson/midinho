@@ -3,8 +3,13 @@ import { LitElement, html, css } from './node_modules/lit-element/lit-element.js
 export class Search extends LitElement {
 
   static styles = css`
-    #search-container {
+    .search-container {
       font-size: 1rem;
+      padding-bottom: 1rem;
+    }
+    .search-header-container{
+      width: 60vw;
+      display: inline-block;
     }
     #search-query {
       border-radius: 0.5rem;
@@ -14,18 +19,26 @@ export class Search extends LitElement {
     }
     #search-response {
       border-radius: 1rem;
-      padding: 1rem;
+      padding-top: 1rem;
+      width: 60vw;
+      float: left;
+    }
+    .search-response-loading {
+      border-radius: 1rem;
+      padding-bottom: 1rem;
       width: 60vw;
       float: left;
     }
   `;
 
   static properties = {
-    msg: {type: Object}
+    msg: {type: Object},
+    loading: { type: Boolean }
   };
 
   constructor() {
     super();
+    this.loading = true;
   }
 
   write(token) {
@@ -43,13 +56,28 @@ export class Search extends LitElement {
     }
   }
 
+  end(){
+    this.loading = false;
+    setTimeout(() => {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
+    }, 0);
+  }
+
   render() {
     return html`
       <link rel="stylesheet" href="css/pico.min.css">
       <link rel="stylesheet" href="css/pico.colors.min.css">
-      <div id="search-container">
-        <div id="search-query" class="pico-background-sand-50">${this.msg.query}</div>
-        <div id="search-response"></div>
+      <div class="search-container">
+        <div class="search-header-container">
+          <div id="search-query" class="pico-background-sand-50">${this.msg.query}</div>
+        </div>
+        <div id="search-response">
+         <p class=".search-response-loading" aria-busy="true">&nbsp;</p>
+        </div>
+        ${!this.loading ? html`
+          <small>
+            ${this.msg.model}
+          </small>` : ''}
       </div>
     `;
   }
