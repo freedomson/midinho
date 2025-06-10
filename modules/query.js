@@ -99,6 +99,7 @@ export class Query extends LitElement {
       // Set bridge vars
       window.pythonQueryStr = msg.query;
       window.pythonSelectedModel = selectedModel
+      window.Prism = Prism
 
       // Update UI with message
       await this.requestUpdate();
@@ -106,21 +107,19 @@ export class Query extends LitElement {
       let msgEl = this.renderRoot.getElementById(`md-search-${this.msgs.length}`);
 
       setTimeout(() => {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
       }, 0);
 
       this.pyodide.globals.set(
         "callback",
         (token) => msgEl.write.bind(msgEl)(token));
 
-
-
       this.pyodide.globals.set(
         "donecallback",
         () => msgEl.end.bind(msgEl)());
 
       this.pyodide.runPythonAsync(`
-        from js import pythonQueryStr, pythonSelectedModel
+        from js import pythonQueryStr, pythonSelectedModel, Prism
         try:
           await llm.run_query(pythonQueryStr, pythonSelectedModel, callback, donecallback)
         except Exception as e:

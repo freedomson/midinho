@@ -49,7 +49,9 @@ export class Search extends LitElement {
     if (token) {
       var converter = new showdown.Converter();
       this.msg.response += token;
-      this.renderRoot.getElementById("search-response").innerHTML = converter.makeHtml(this.msg.response)
+      let el =  this.renderRoot.getElementById("search-response")
+      el.innerHTML = converter.makeHtml(this.msg.response)
+      Prism.highlightAllUnder(el)
       if (atBottom) {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
       }
@@ -59,12 +61,14 @@ export class Search extends LitElement {
   end(){
     this.loading = false;
     setTimeout(() => {
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }, 0);
   }
 
   render() {
     return html`
+    <link href="./static/prism.css" rel="stylesheet" />
+    <script src="./static/prism.js" data-manual></script>
       <link rel="stylesheet" href="css/pico.min.css">
       <link rel="stylesheet" href="css/pico.colors.min.css">
       <div class="search-container">
