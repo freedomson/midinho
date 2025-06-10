@@ -11,11 +11,8 @@ export class Error extends LitElement {
       text-align: center;
       display: block;
     }
-    .pico-background-grey-50 {
-      border-radius: 0.1rem;
-      font-family: 'Courier New', Courier, monospace;
-      padding: 1rem;
-      font-size: 1rem;
+    pre, code {
+      font-size: 1rem !important;
     }
     .icon {
       width: 25px;
@@ -25,11 +22,16 @@ export class Error extends LitElement {
     error: {type: Object}
   };
 
+  firstUpdated() {
+    let el =  this.renderRoot.getElementById("error-info")
+    Prism.highlightAllUnder(el)
+  }
+
   render() {
     return html`
       <link rel="stylesheet" href="css/pico.sand.min.css">
-      <link rel="stylesheet" href="css/pico.colors.min.css">
-
+      <link href="./static/prism.css" rel="stylesheet" />
+      <script src="./static/prism.js" data-manual></script>
       <article id="error-container">
         <h2>Oops, something went wrong!</h2>
         ${this.error}
@@ -70,9 +72,9 @@ export class Error extends LitElement {
               </div>
                 Windows Power Shell (admin)
               </summary>
-              <div class="pico-background-grey-50">
+              <pre><code class="language-shell">
                 $env:OLLAMA_ORIGINS="https://freedomson.github.io"; ollama serve
-              </div>
+              </code></pre>
               <br/>
             </div>
             <div class="outline contrast">
@@ -84,9 +86,9 @@ export class Error extends LitElement {
                 </div>
                 MacOS Shell
               </summary>
-              <div class="pico-background-grey-50">
+              <pre><code class="language-shell">
                 export OLLAMA_ORIGINS="https://freedomson.github.io" && ollama serve
-              </div>
+              </pre></code>
               <br/>
             </div>
             <div class="outline contrast">
@@ -98,9 +100,9 @@ export class Error extends LitElement {
                 </div>
                 Linux Shell
               </summary>
-              <div class="pico-background-grey-50">
+              <pre><code class="language-shell">
                 export OLLAMA_ORIGINS="https://freedomson.github.io" && ollama serve
-              </div>
+              </pre></code>
             </div>
           </div>
         </article>
