@@ -41,28 +41,36 @@ export class Search extends LitElement {
     this.loading = true;
   }
 
-  write(token) {
+  isAtBottom() {
     let scrollTop = window.scrollY || document.documentElement.scrollTop;
     let windowHeight = window.innerHeight;
     let docHeight = document.documentElement.scrollHeight;
     let atBottom = scrollTop + windowHeight >= docHeight - 10;
+    return atBottom;
+  }
+
+  write(token) {
     if (token) {
+      let aBottom = this.isAtBottom()
       var converter = new showdown.Converter();
       this.msg.response += token;
       let el =  this.renderRoot.getElementById("search-response")
       el.innerHTML = converter.makeHtml(this.msg.response)
       Prism.highlightAllUnder(el)
-      if (atBottom) {
+      if (aBottom) {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
       }
     }
   }
 
-  end(){
+  end() {
+    let aBottom = this.isAtBottom()
     this.loading = false;
-    setTimeout(() => {
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    }, 0);
+    if (aBottom) {
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      }, 0);
+    }
   }
 
   render() {

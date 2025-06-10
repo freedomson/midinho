@@ -23,6 +23,8 @@ export class Query extends LitElement {
     }
     #query-query {
       margin-bottom: 0.5rem;
+      max-height: 7rem;
+      min-height: 5rem;
     }
     #query-button {
       width: 30vw;
