@@ -79,9 +79,9 @@ export class QueryModelsDownload extends LitElement {
         "input": ["text"]
       },
       {
-        "name": "llama2-uncensored:7b",
-        "size": 3.8 * 1024 * 1024 * 1024,
-        "context": "2K",
+        "name": "mistral:7b",
+        "size": 4.1 * 1024 * 1024 * 1024,
+        "context": "30K",
         "input": ["text"]
       },
       {
@@ -198,7 +198,7 @@ export class QueryModelsDownload extends LitElement {
   }
 
   roundTo2Decimals(num) {
-    return Math.round(num * 100) / 100;
+    return (Math.round(num * 100) / 100).toFixed(2);
   }
 
   async deleteModel(modelName) {
