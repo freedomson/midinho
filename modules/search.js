@@ -52,7 +52,15 @@ export class Search extends LitElement {
   write(token) {
     if (token) {
       let aBottom = this.isAtBottom()
-      var converter = new showdown.Converter();
+      // https://showdownjs.com/docs/available-options
+      var converter = new showdown.Converter({
+        tables: true,
+        ghCodeBlocks: false,
+        simplifiedAutoLink: true,
+        strikethrough: true,
+        tasklists: true,
+        underline: true
+      });
       this.msg.response += token;
       let el =  this.renderRoot.getElementById("search-response")
       el.innerHTML = converter.makeHtml(this.msg.response)

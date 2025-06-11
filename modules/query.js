@@ -73,7 +73,7 @@ export class Query extends LitElement {
       return;
     }
     this.userquery = e.target.value
-    this.disabled = !e.target.value
+    this.setDisabled(false)
     if ( e.keyCode == 13 && !e.shiftKey ) {
       this.submitQuery()
     }
@@ -85,6 +85,9 @@ export class Query extends LitElement {
   }
 
   async submitQuery() {
+
+      // Lock until next query
+      this.setDisabled(true)
 
       // Construct message
       let selectedModel = this.getSelectedModel()
@@ -118,7 +121,11 @@ export class Query extends LitElement {
 
       this.pyodide.globals.set(
         "donecallback",
-        () => msgEl.end.bind(msgEl)());
+        () => {
+          msgEl.end.bind(msgEl)()
+          // Unlock  query
+          this.setDisabled(false)
+        });
 
       this.pyodide.runPythonAsync(`
         from js import pythonQueryStr, pythonSelectedModel, Prism
@@ -129,8 +136,11 @@ export class Query extends LitElement {
       `)
 
       queryEl.value = ""
-      this.disabled = true
 
+  }
+
+  setDisabled(value) {
+    this.disabled = value;
   }
 
   render() {
