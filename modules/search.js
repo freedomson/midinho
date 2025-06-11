@@ -4,7 +4,7 @@ export class Search extends LitElement {
 
   static styles = css`
     .search-container {
-      font-size: 1rem;
+      font-size: 1.2rem;
       padding-bottom: 1rem;
     }
     .search-header-container{
