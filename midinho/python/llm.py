@@ -2,6 +2,7 @@ from langchain.callbacks.base import BaseCallbackHandler
 from langchain_ollama import ChatOllama
 from langchain.prompts import PromptTemplate
 from langchain_core.messages import HumanMessage, AIMessage
+import asyncio
 
 class MyStreamingHandler(BaseCallbackHandler):
     def setMsgCallback(self, callback, donecallback):
@@ -14,7 +15,6 @@ class MyStreamingHandler(BaseCallbackHandler):
       self.donecallback()
 
 chat_history = []
-
 timeout = 360
 keepalive = "10m"
 
@@ -32,10 +32,22 @@ def create_chain(model, callback, donecallback):
     )
     return llm
 
-async def run_query(user_query, pythonSelectedModel, callback , donecallback):
-  user_prompt = PromptTemplate.from_template("Answer user query: {query}")
-  formatted_query = user_prompt.format(query=user_query)
-  chat_history.append(HumanMessage(content=formatted_query))
-  chain = create_chain(pythonSelectedModel, callback, donecallback)
-  response = await chain.ainvoke(chat_history, config={"timeout": timeout})
-  chat_history.append(AIMessage(content=response.content))
+async def run(user_query, pythonSelectedModel, callback, donecallback, cancelcallback=None):
+    try:
+        user_prompt = PromptTemplate.from_template("Answer user query: {query}")
+        formatted_query = user_prompt.format(query=user_query)
+        chat_history.append(HumanMessage(content=formatted_query))
+        chain = create_chain(pythonSelectedModel, callback, donecallback)
+        response = await chain.ainvoke(chat_history, config={"timeout": timeout})
+        chat_history.append(AIMessage(content=response.content))
+    except asyncio.CancelledError:
+        if cancelcallback:
+            cancelcallback("Task was cancelled.")
+    except Exception as e:
+        # Handle other exceptions if needed
+        print(f"Error: {e}")
+
+def run_query(user_query, pythonSelectedModel, callback , donecallback, cancelcallback):
+  return asyncio.create_task(
+          run(user_query, pythonSelectedModel, callback , donecallback, cancelcallback)
+        )

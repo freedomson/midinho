@@ -7,16 +7,13 @@ export class QueryModels extends LitElement {
 
   static styles = css`
     #ollamamodel {
-      width: 19vw;
       float: right;
+      min-width: 3rem;
+      max-width: 25vw;
     }
     #md-query-models-download {
-      width: 10vw;
       float: right;
       margin-left: 0.25rem;
-    }
-    #md-query-models-download-img{
-      height: 20px;
     }
   `;
 
@@ -32,6 +29,7 @@ export class QueryModels extends LitElement {
   constructor() {
     super();
     this.textSelectModel = 'Please select LLM';
+    this.text = "Models"
     this.showDownloadModel = false
     this.preloadModelStatus = []
   }
@@ -72,7 +70,7 @@ export class QueryModels extends LitElement {
           this.requestUpdate()
         }).bind(this)}
         class="outline">
-          <img id="md-query-models-download-img" src="./css/gear.png">
+          ${this.text}
         </div>
     `
   }
@@ -131,6 +129,7 @@ export class QueryModels extends LitElement {
   renderModelList() {
     return html `
       <select
+          class="outline"
           id="ollamamodel"
           aria-label="${this.textSelectModel}"
           @change=${this.onChange}

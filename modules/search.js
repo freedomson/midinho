@@ -54,15 +54,15 @@ export class Search extends LitElement {
       let aBottom = this.isAtBottom()
       // https://showdownjs.com/docs/available-options
       var converter = new showdown.Converter({
-        tables: true,
-        ghCodeBlocks: false,
-        simplifiedAutoLink: true,
-        strikethrough: true,
-        tasklists: true,
-        underline: true
+        tables: true
+        // ghCodeBlocks: false,
+        // simplifiedAutoLink: true,
+        // strikethrough: true,
+        // tasklists: true,
+        // underline: true
       });
       this.msg.response += token;
-      let el =  this.renderRoot.getElementById("search-response")
+      let el = this.renderRoot.getElementById("search-response")
       el.innerHTML = converter.makeHtml(this.msg.response)
       Prism.highlightAllUnder(el)
       if (aBottom) {

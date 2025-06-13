@@ -113,7 +113,6 @@ class App extends LitElement {
 
 
   handleUpdateModels = (e) => {
-    console.log("updating",e.detail)
     this.ollamamodels = e.detail;
     this.requestUpdate();
     const q = this.renderRoot?.querySelector('md-query')?.shadowRoot.querySelector('md-query-models')

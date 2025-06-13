@@ -1,7 +1,7 @@
 import {LitElement, html, css} from './node_modules/lit-element/lit-element.js'
-import { ref, createRef } from './node_modules/lit-html/directives/ref.js';
 import './search.js';
 import './query-models.js';
+import './query-text.js';
 import { pyodideContext } from './context.js';
 import { consume } from './node_modules/@lit-labs/context/index.js';
 
@@ -21,19 +21,7 @@ export class Query extends LitElement {
       margin-bottom: 160px;
       float: left;
     }
-    #query-query {
-      margin-bottom: 0.5rem;
-      max-height: 7rem;
-      min-height: 5rem;
-    }
-    #query-button {
-      width: 30vw;
-      float: left;
-    }
-    #query-container {
-
-    }
-    #query-container-wrapper{
+    .query-container-wrapper {
       position: fixed;
       bottom: 0;
       width: 60vw;
@@ -44,57 +32,40 @@ export class Query extends LitElement {
 
   static properties = {
     textarea: {type: Object},
-    disabled: {type: Boolean},
-    msgs: {type: Array}
+    msgs: {type: Array},
+    loading:  {type: Boolean}
   };
 
   constructor() {
     super();
     this.messageWelcome = 'What can I help with?';
-    this.placeholder = 'Ask anything';
-    this.buttonText = 'Ask';
-    this.disabled = true
     this.msgs = [];
     this.msgsRefs = []
+    this.loading = false
   }
 
   firstUpdated() {
-    this.textarea = this.renderRoot.getElementById('query-query');
-    this.textarea.focus();
+    this.mdQueryText = this.shadowRoot.querySelector('md-query-text');
+    this.mdQueryModels = this.shadowRoot.querySelector('md-query-models');
   }
 
-  isEmptyAfterTrim(str) {
-    return str.replace(/\s/g, '') === '';
+  isLoading(){
+    return this.loading;
   }
 
-  handleKeyup(e) {
-    if (this.isEmptyAfterTrim(e.target.value)){
-      e.target.value = ""
-      return;
-    }
-    this.userquery = e.target.value
-    this.setDisabled(false)
-    if ( e.keyCode == 13 && !e.shiftKey ) {
-      this.submitQuery()
-    }
+  setLoading(value) {
+    this.loading = value
   }
 
-  getSelectedModel() {
-    let mdQueryModels = this.shadowRoot.querySelector('md-query-models');
-    return mdQueryModels.getSelectedModel.bind(mdQueryModels)();
-  }
+  async submitQuery(query) {
 
-  async submitQuery() {
-
-      // Lock until next query
-      this.setDisabled(true)
+      this.setLoading(true)
 
       // Construct message
-      let selectedModel = this.getSelectedModel()
-      let queryEl = this.renderRoot.getElementById('query-query')
+      let selectedModel = this.mdQueryModels.getSelectedModel()
       let msg = {
         id: this.msgs.length,
-        query: queryEl.value,
+        query: query,
         model: selectedModel,
         response: ""
       }
@@ -112,7 +83,7 @@ export class Query extends LitElement {
       let msgEl = this.renderRoot.getElementById(`md-search-${this.msgs.length}`);
 
       setTimeout(() => {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
       }, 0);
 
       this.pyodide.globals.set(
@@ -123,24 +94,25 @@ export class Query extends LitElement {
         "donecallback",
         () => {
           msgEl.end.bind(msgEl)()
-          // Unlock  query
-          this.setDisabled(false)
+          this.setLoading(false)
+          this.mdQueryText.enable()
         });
+
+        this.pyodide.globals.set(
+          "cancelcallback",
+          () => {
+            this.setLoading(false)
+            this.mdQueryText.enable()
+          });
 
       this.pyodide.runPythonAsync(`
         from js import pythonQueryStr, pythonSelectedModel, Prism
         try:
-          await llm.run_query(pythonQueryStr, pythonSelectedModel, callback, donecallback)
+          llm.task = llm.run_query(pythonQueryStr, pythonSelectedModel, callback, donecallback, cancelcallback)
         except Exception as e:
             print("Caught a generic exception:", e)
       `)
 
-      queryEl.value = ""
-
-  }
-
-  setDisabled(value) {
-    this.disabled = value;
   }
 
   render() {
@@ -155,25 +127,13 @@ export class Query extends LitElement {
               ></md-search>
           `)}
         </div>
-        <div
-          id="query-container-wrapper" >
+        <div class="query-container-wrapper" >
           <hr class="pico-background-grey-50" />
-          <div id="query-container">
-            <textarea
-              id="query-query"
-              placeholder="${this.placeholder}"
-              aria-label="${this.placeholder}"
-              @keyup=${this.handleKeyup}
-            >${this.userquery}</textarea>
-            <fieldset class="group">
-              ${ this.disabled ?
-                html`<div id="query-button" @click=${this.submitQuery} disabled type="submit">${this.buttonText}</div>`
-                :
-                html`<div id="query-button" @click=${this.submitQuery} type="submit">${this.buttonText}</div>`
-              }
-              <md-query-models></md-query-models>
-            </fieldset>
-          </div>
+          <md-query-text
+            .isLoading=${this.isLoading.bind(this)}
+            .submitQuery=${this.submitQuery.bind(this)}>
+          </md-query-text>
+          <md-query-models></md-query-models>
         </div>
     `;
   }

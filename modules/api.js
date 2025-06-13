@@ -28,8 +28,6 @@ class OllamaApi {
       const data = await response.json();
       this.models = data.models
       this.modelNames = this.models.map(model => model.name);
-      // console.log('Available models:', this.modelNames);
-      // console.log(this.models)
       return this.modelNames;
     } catch (error) {
       console.error('Error fetching model list:', error);
