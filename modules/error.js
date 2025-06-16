@@ -72,9 +72,9 @@ export class Error extends LitElement {
               </div>
                 Windows Power Shell (admin)
               </summary>
-              <pre><code class="language-shell">
-                $env:OLLAMA_ORIGINS="https://freedomson.github.io"; ollama serve
-              </code></pre>
+<pre><code class="language-shell">
+$env:OLLAMA_ORIGINS="https://freedomson.github.io"; ollama serve
+</code></pre>
               <br/>
             </div>
             <div class="outline contrast">
@@ -86,9 +86,9 @@ export class Error extends LitElement {
                 </div>
                 MacOS Shell
               </summary>
-              <pre><code class="language-shell">
-                export OLLAMA_ORIGINS="https://freedomson.github.io" && ollama serve
-              </pre></code>
+<pre><code class="language-shell">
+export OLLAMA_ORIGINS="https://freedomson.github.io" && ollama serve
+</pre></code>
               <br/>
             </div>
             <div class="outline contrast">
@@ -100,9 +100,9 @@ export class Error extends LitElement {
                 </div>
                 Linux Shell
               </summary>
-              <pre><code class="language-shell">
-                export OLLAMA_ORIGINS="https://freedomson.github.io" && ollama serve
-              </pre></code>
+<pre><code class="language-shell">
+export OLLAMA_ORIGINS="https://freedomson.github.io" && ollama serve
+</pre></code>
             </div>
           </div>
         </article>
