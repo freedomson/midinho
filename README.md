@@ -2,18 +2,25 @@
 
 
 
-# 🛡️ Private Ollama: The 100% Private LLM Chatbot
+# 🛡️ Midinho - A Talking LLM
 
 A **fully offline**, secure, and open-source chatbot built with:
 
 - 🔧 **Ollama** (local LLM engine)
 - 🧱 **Lit** (web components for modern UI)
 - 🧠 **Langchain + Pyodide** (LLM orchestration in WebAssembly)
+- 🧘 And others
 \
 \
-👉 [🔗 Live Demo](https://freedomson.github.io/midinho/)
+👉 [🔗 Live Demo](https://midinhho-b1c7d.web.app)
 
-![My Ad](screenshot.png)
+
+## English Audio Example
+[![Watch the demo in English](screenshot.png)](https://midinhho-b1c7d.web.app/example_en_us.mov)
+
+## Portuguese Audio Example
+[![Watch the demo in Portuguese](screenshot.png)](https://midinhho-b1c7d.web.app/example_pt_pt.mov)
+
 ---
 ## 🚀 Project Overview
 
