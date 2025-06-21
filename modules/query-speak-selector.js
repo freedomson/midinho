@@ -5,7 +5,7 @@ export class Header extends LitElement {
 
   static styles = [picocss,css`
     .md-speak-selector {
-      width: 8rem;
+      width: 9rem;
     }
 `];
 
