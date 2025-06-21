@@ -1,21 +1,22 @@
 import { LitElement, html, css } from './node_modules/lit-element/lit-element.js'
 import './query-start.js';
 import './query-stop.js';
+import './query-speak-selector.js';
 import { pyodideContext } from './context.js';
 import { consume } from './node_modules/@lit-labs/context/index.js';
-
+import { picocss } from './style.js';
 export class QueryText extends LitElement {
 
-  static styles = css`
-    #md-query-text {
-      max-height: 7rem;
-      min-height: 5rem;
-    }
-  `;
+  static styles = [picocss, css`
+      #md-query-text{
+        min-height: 3rem;
+      }
+    `];
 
   static properties = {
     disabled: {type: Boolean},
-    submitQuery: { type: Function}
+    submitQuery: { type: Function},
+    cancelCallBack: { type: Function}
   };
 
   constructor() {
@@ -72,7 +73,6 @@ export class QueryText extends LitElement {
 
   render() {
     return html`
-      <link rel="stylesheet" href="css/pico.sand.min.css">
         ${ this.disabled ?
           html `
             <textarea
@@ -95,12 +95,18 @@ export class QueryText extends LitElement {
             ></textarea>
           `
         }
+        <div class="grid">
         <md-query-start
           .processQuery=${this.processQuery.bind(this)}
           ></md-query-start>
         <md-query-stop
+          .cancelCallBack=${this.cancelCallBack.bind(this)}
           .pyodide=${this.pyodide}
           ></md-query-stop>
+        <md-speak-selector></md-speak-selector>
+        <div>
+        <br/>
+        <br/>
     `;
   }
 }

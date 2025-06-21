@@ -1,40 +1,46 @@
 import {LitElement, html, css} from './node_modules/lit-element/lit-element.js'
 import './search.js';
-import './query-models.js';
 import './query-text.js';
 import { pyodideContext } from './context.js';
 import { consume } from './node_modules/@lit-labs/context/index.js';
-
+import { picocss } from './style.js';
+import { store } from './store.js';
 export class Query extends LitElement {
 
-  static styles = css`
+  static styles = [picocss, css`
     hr {
       padding: 0;
       margin: 0;
     }
-    #query-welcome {
+    .md-query-welcome {
       text-align: center;
       display: block;
       margin-bottom: 1rem;
     }
     #query-response {
-      margin-bottom: 160px;
       float: left;
+      width: 100%;
     }
     .query-container-wrapper {
-      position: fixed;
-      bottom: 0;
-      width: 60vw;
-      height: 160px;
       background-color: var(--pico-background-color);
     }
-  `;
+  `];
 
   static properties = {
     textarea: {type: Object},
     msgs: {type: Array},
     loading:  {type: Boolean}
   };
+
+  connectedCallback() {
+    super.connectedCallback();
+    store.subscribe(this);
+  }
+
+  disconnectedCallback() {
+    store.unsubscribe(this);
+    super.disconnectedCallback();
+  }
 
   constructor() {
     super();
@@ -46,7 +52,6 @@ export class Query extends LitElement {
 
   firstUpdated() {
     this.mdQueryText = this.shadowRoot.querySelector('md-query-text');
-    this.mdQueryModels = this.shadowRoot.querySelector('md-query-models');
   }
 
   isLoading(){
@@ -62,7 +67,7 @@ export class Query extends LitElement {
       this.setLoading(true)
 
       // Construct message
-      let selectedModel = this.mdQueryModels.getSelectedModel()
+      let selectedModel = store.model
       let msg = {
         id: this.msgs.length,
         query: query,
@@ -93,17 +98,15 @@ export class Query extends LitElement {
       this.pyodide.globals.set(
         "donecallback",
         () => {
-          msgEl.end.bind(msgEl)()
-          this.setLoading(false)
-          this.mdQueryText.enable()
+          msgEl.end.bind(msgEl)((()=>{
+            this.setLoading(false)
+            this.mdQueryText.enable()
+          }).bind(this))
         });
 
         this.pyodide.globals.set(
           "cancelcallback",
-          () => {
-            this.setLoading(false)
-            this.mdQueryText.enable()
-          });
+          () => {});
 
       this.pyodide.runPythonAsync(`
         from js import pythonQueryStr, pythonSelectedModel, Prism
@@ -115,25 +118,35 @@ export class Query extends LitElement {
 
   }
 
+  cancelCallBack(){
+    let msgEl = this.renderRoot.getElementById(`md-search-${this.msgs.length}`);
+    msgEl.cancel.bind(msgEl)((()=>{
+      this.setLoading(false)
+      this.mdQueryText.enable()
+    }).bind(this))
+  }
+
   render() {
     return html`
-        <link rel="stylesheet" href="css/pico.sand.min.css">
-        <small id="query-welcome">${this.messageWelcome}</small>
+        <p class="md-query-welcome">
+          ${this.messageWelcome}
+        </p>
         <div id="query-response">
           ${this.msgs.map((msg, index) => html`
             <md-search
               id="md-search-${index+1}"
+              .speak=${store.speak}
+              .worker=${store.speakerWorker}
               .msg=${msg}
               ></md-search>
           `)}
         </div>
         <div class="query-container-wrapper" >
-          <hr class="pico-background-grey-50" />
           <md-query-text
+            .cancelCallBack=${this.cancelCallBack.bind(this)}
             .isLoading=${this.isLoading.bind(this)}
             .submitQuery=${this.submitQuery.bind(this)}>
           </md-query-text>
-          <md-query-models></md-query-models>
         </div>
     `;
   }

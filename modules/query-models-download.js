@@ -2,9 +2,9 @@ import { LitElement, html, css } from './node_modules/lit-element/lit-element.js
 import OllamaApi from './api.js';
 import { ollamamodelsContext } from './context.js';
 import { consume } from './node_modules/@lit-labs/context/index.js';
-
+import { picocss } from './style.js';
 export class QueryModelsDownload extends LitElement {
-  static styles = css`
+  static styles = [picocss, css`
     dialog {
       font-size: 1rem;
     }
@@ -19,8 +19,11 @@ export class QueryModelsDownload extends LitElement {
     #md-query-models-download-status-progress{
       text-align: right;
     }
-  `;
-
+  `];
+  // createRenderRoot() {
+  //   // This disables Shadow DOM; component styles are global
+  //   return this;
+  // }
   static properties = {
     ollamamodels:{type: Array},
     defaultModels: {type: Array},
@@ -54,36 +57,36 @@ export class QueryModelsDownload extends LitElement {
         "context": "32K",
         "input": ["text","image"]
       },
-      // {
-      //   "name": "smollm:135m",
-      //   "size": 0.092 * 1024 * 1024 * 1024,
-      //   "context": "2K",
-      //   "input": ["text"]
-      // },
-      // {
-      //   "name": "smollm2:135m",
-      //   "size": 0.271 * 1024 * 1024 * 1024,
-      //   "context": "8K",
-      //   "input": ["text"]
-      // },
       {
-        "name": "deepseek-r1:8b",
-        "size": 5.2 * 1024 * 1024 * 1024,
-        "context": "128K",
+        "name": "smollm:135m",
+        "size": 0.092 * 1024 * 1024 * 1024,
+        "context": "2K",
         "input": ["text"]
       },
+      {
+        "name": "smollm2:135m",
+        "size": 0.271 * 1024 * 1024 * 1024,
+        "context": "8K",
+        "input": ["text"]
+      },
+      // {
+      //   "name": "deepseek-r1:8b",
+      //   "size": 5.2 * 1024 * 1024 * 1024,
+      //   "context": "128K",
+      //   "input": ["text"]
+      // },
       {
         "name": "llama3.1:8b",
         "size": 4.9 * 1024 * 1024 * 1024,
         "context": "128K",
         "input": ["text"]
       },
-      {
-        "name": "mistral:7b",
-        "size": 4.1 * 1024 * 1024 * 1024,
-        "context": "30K",
-        "input": ["text"]
-      },
+      // {
+      //   "name": "mistral:7b",
+      //   "size": 4.1 * 1024 * 1024 * 1024,
+      //   "context": "30K",
+      //   "input": ["text"]
+      // },
       {
         "name": "deepseek-r1:14b",
         "size": 9.0 * 1024 * 1024 * 1024,
@@ -253,8 +256,7 @@ export class QueryModelsDownload extends LitElement {
 
   render() {
     return html`
-      <link rel="stylesheet" href="css/pico.sand.min.css">
-      <link rel="stylesheet" href="css/pico.colors.min.css">
+      <link rel="stylesheet" href="./css/pico.sand.min.css">
       <dialog open>
         <article>
           <header>
@@ -267,7 +269,10 @@ export class QueryModelsDownload extends LitElement {
                   !this.ollamamodels.length ?
                     html `<mark>No models found! Please install from the list!</mark>`
                     :
-                    html `<button class="outline contrast" @click=${this.finish.bind(this)}>Close</button>`
+                    this.busy ?
+                      ""
+                      :
+                      html `<button class="outline contrast" @click=${this.finish.bind(this)}>Close</button>`
                 }
               </div>
             </div>

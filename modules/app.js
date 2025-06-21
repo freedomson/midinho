@@ -9,7 +9,7 @@ import './nav.js';
 import './error.js';
 import { pyodideContext, ollamamodelsContext } from './context.js';
 import { provide } from './node_modules/@lit-labs/context/index.js';
-
+import { picocss } from './style.js';
 class App extends LitElement {
 
   static properties = {
@@ -23,15 +23,14 @@ class App extends LitElement {
     this.ollamamodels = [];
   }
 
-  static styles = css`
-    #app-container-wrapper {
-      width: 100vw;
-      padding-left: 20vw;
+  static styles = [picocss, css`
+    .md-app-container-wrapper {
+
     }
-    #app-container {
-      width: 60vw;
+    .md-app-container {
+
     }
-  `;
+  `];
 
   async getOllamaModels() {
     await OllamaApi.getOllamaModels();
@@ -82,12 +81,33 @@ class App extends LitElement {
 
   _loadPythonSourceCodeTask = new Task(this, {
     task: async ([], {signal}) => {
-      // return;
       await this.getOllamaModels();
       await this.setupPyodide();
     },
     args: () => []
   });
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.addEventListener('update-models', this.handleUpdateModels);
+  }
+
+  disconnectedCallback() {
+    this.removeEventListener('update-models', this.handleUpdateModels);
+    super.disconnectedCallback();
+  }
+
+  handleUpdateModels = (e) => {
+    this.ollamamodels = e.detail;
+    this.requestUpdate();
+    const q = this.renderRoot?.querySelector('md-nav')?.shadowRoot.querySelector('md-query-models')
+    if (q)
+      q.dispatchEvent(new CustomEvent('context-updated-manual', {
+        detail: { value: this.ollamamodels },
+        bubbles: false,
+        composed: true
+      }));
+  };
 
   onSuccess(){
     return html`
@@ -101,42 +121,23 @@ class App extends LitElement {
     `
   }
 
-  connectedCallback() {
-    super.connectedCallback();
-    this.addEventListener('update-models', this.handleUpdateModels);
-  }
-
-  disconnectedCallback() {
-    this.removeEventListener('update-models', this.handleUpdateModels);
-    super.disconnectedCallback();
-  }
-
-
-  handleUpdateModels = (e) => {
-    this.ollamamodels = e.detail;
-    this.requestUpdate();
-    const q = this.renderRoot?.querySelector('md-query')?.shadowRoot.querySelector('md-query-models')
-    if (q)
-      q.dispatchEvent(new CustomEvent('context-updated-manual', {
-        detail: { value: this.ollamamodels },
-        bubbles: false,
-        composed: true
-      }));
-  };
-
   render() {
     return html`
-      <link rel="stylesheet" href="css/pico.sand.min.css">
+      <link rel="stylesheet" href="./css/pico.sand.min.css">
+
       <div id="app-container-wrapper">
       <div id="app-container">
+
+      <div class="md-app-container-wrapper">
+      <div class="md-app-container">
+
       ${
         this._loadPythonSourceCodeTask.render({
           initial: () => html`<br /><p>Waiting to start task</p>`,
           pending: () => html`
             <br />
             <md-header></md-header>
-            <p align="center">Loading components...</p>
-            <progress />
+            <progress ></progress>
             `,
           complete: (value) => this.onSuccess(),
           error: (error) => html`

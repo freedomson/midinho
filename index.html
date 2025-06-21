@@ -9,19 +9,30 @@
     <title>Midinho</title>
 
     <script src="./static/showdown.min.js"></script>
+    <script src="./static/prism.js" data-manual></script>
 
     <script type="module" src="./modules/app.js"></script>
+
     <script src="./pyodide/pyodide.js"></script>
 
     <link rel="stylesheet" href="./css/pacifico.css">
-    <link rel="stylesheet" href="./css/pico.min.css">
-    <link rel="stylesheet" href="./css/pico.colors.min.css">
 
-    <link href="./static/prism.css" rel="stylesheet" />
-    <script src="./static/prism.js" data-manual></script>
     <style>
       :root {
         font-size: 14px;
+      }
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding-left: 10vw;
+        padding-right: 10vw;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+        height: 100vh;
+        margin: 0;
       }
     </style>
   </head>

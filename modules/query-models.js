@@ -3,19 +3,16 @@ import './query-models-download.js';
 import { consume } from './node_modules/@lit-labs/context/index.js';
 import { ollamamodelsContext } from './context.js';
 import OllamaApi from './api.js';
+import { picocss } from './style.js';
+import { store } from './store.js';
 export class QueryModels extends LitElement {
 
-  static styles = css`
+  static styles = [picocss, css`
     #ollamamodel {
-      float: right;
-      min-width: 3rem;
-      max-width: 25vw;
     }
     #md-query-models-download {
-      float: right;
-      margin-left: 0.25rem;
     }
-  `;
+  `];
 
   static properties = {
     ollamamodels: {type: Object},
@@ -41,10 +38,12 @@ export class QueryModels extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
+    store.subscribe(this);
     this.addEventListener('context-updated-manual', this.onContextUpdate);
   }
 
   disconnectedCallback() {
+    store.unsubscribe(this);
     this.removeEventListener('context-updated-manual', this.onContextUpdate);
     super.disconnectedCallback();
   }
@@ -53,6 +52,10 @@ export class QueryModels extends LitElement {
     console.log('Received context update manually:', e.detail.value);
     this.ollamamodels = e.detail.value;
     this.requestUpdate();
+    // Updated via downloads
+    setTimeout(() => {
+      store.setModel(this.getSelectedModel());
+    }, 0);
   }
 
   getSelectedModel(){
@@ -120,10 +123,12 @@ export class QueryModels extends LitElement {
 
   onChange() {
     this.preloadModel()
+    store.setModel(this.getSelectedModel());
   }
 
   firstUpdated() {
     this.preloadModel()
+    store.setModel(this.getSelectedModel());
   }
 
   renderModelList() {
@@ -148,7 +153,7 @@ export class QueryModels extends LitElement {
 
   render() {
     return html`
-      <link rel="stylesheet" href="css/pico.sand.min.css">
+      <div class="grid">
       ${
         this.showDownloadModel ?
           html `
@@ -157,10 +162,11 @@ export class QueryModels extends LitElement {
           </md-query-models-download>`
         :
           html`
-            ${this.getDownloadComponent()}
             ${this.renderModelList()}
+            ${this.getDownloadComponent()}
           `
       }
+      </div>
     `;
   }
 }

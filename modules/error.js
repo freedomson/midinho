@@ -1,7 +1,7 @@
 import { LitElement, html, css } from './node_modules/lit-element/lit-element.js'
-
+import { picocss, prismcss } from './style.js';
 export class Error extends LitElement {
-  static styles = css`
+  static styles = [picocss, prismcss, css`
     #error-container {
       margin-top: 1rem;
       text-align: center;
@@ -17,7 +17,7 @@ export class Error extends LitElement {
     .icon {
       width: 25px;
     }
-  `;
+  `];
   static properties = {
     error: {type: Object}
   };
@@ -29,8 +29,7 @@ export class Error extends LitElement {
 
   render() {
     return html`
-      <link rel="stylesheet" href="css/pico.sand.min.css">
-      <link href="./static/prism.css" rel="stylesheet" />
+      <link rel="stylesheet" href="./css/prism.css">
       <script src="./static/prism.js" data-manual></script>
       <article id="error-container">
         <h2>Oops, something went wrong!</h2>

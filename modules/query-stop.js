@@ -1,19 +1,21 @@
 import { LitElement, html, css } from './node_modules/lit-element/lit-element.js'
 import { pyodideContext } from './context.js';
 import { consume } from './node_modules/@lit-labs/context/index.js';
+import { picocss } from './style.js';
 export class QueryStop extends LitElement {
 
-  static styles = css`
+  static styles = [picocss, css`
     #md-query-stop-btn {
       float: left;
       margin-left: 0.5rem;
       margin-bottom: 0px;
       min-width: 3rem;
     }
-  `;
+  `];
 
   static properties = {
     disabled: {type: Boolean},
+    cancelCallBack: {type: Function}
   };
 
   constructor() {
@@ -23,6 +25,7 @@ export class QueryStop extends LitElement {
   }
 
   queryStop(){
+    this.cancelCallBack()
     this.pyodide.runPythonAsync(`
       try:
         llm.task.cancel()
@@ -38,7 +41,6 @@ export class QueryStop extends LitElement {
 
   render() {
     return html`
-      <link rel="stylesheet" href="css/pico.sand.min.css">
       ${ this.disabled ?
         html `
           <div
