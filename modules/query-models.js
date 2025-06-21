@@ -10,7 +10,8 @@ export class QueryModels extends LitElement {
   static styles = [picocss, css`
     #ollamamodel {
     }
-    #md-query-models-download {
+    .grid {
+      min-width: 25rem;
     }
   `];
 

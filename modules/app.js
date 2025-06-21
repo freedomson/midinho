@@ -25,7 +25,7 @@ class App extends LitElement {
 
   static styles = [picocss, css`
     .md-app-container-wrapper {
-
+      min-width: 30rem;
     }
     .md-app-container {
 
