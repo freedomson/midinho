@@ -16,10 +16,10 @@ A **fully offline**, secure, and open-source chatbot built with:
 
 
 ## English Audio Example
-[![Watch the demo in English](screenshot.png)](https://midinhho-b1c7d.web.app/example_en_us.mov)
+[![Watch the demo in English](example_en_us.png)](https://midinhho-b1c7d.web.app/example_en_us.mp4)
 
 ## Portuguese Audio Example
-[![Watch the demo in Portuguese](screenshot.png)](https://midinhho-b1c7d.web.app/example_pt_pt.mov)
+[![Watch the demo in Portuguese](example_pt_pt.png)](https://midinhho-b1c7d.web.app/example_pt_pt.mp4)
 
 ---
 ## 🚀 Project Overview
