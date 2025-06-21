@@ -21,12 +21,15 @@ export class Error extends LitElement {
   static properties = {
     error: {type: Object}
   };
-
+  constructor() {
+    super();
+    this.domain = "midinhho-b1c7d.web.app"
+  }
   firstUpdated() {
     let el =  this.renderRoot.getElementById("error-info")
     Prism.highlightAllUnder(el)
   }
-
+  
   render() {
     return html`
       <link rel="stylesheet" href="./css/prism.css">
@@ -72,7 +75,7 @@ export class Error extends LitElement {
                 Windows Power Shell (admin)
               </summary>
 <pre><code class="language-shell">
-$env:OLLAMA_ORIGINS="https://freedomson.github.io"; ollama serve
+$env:OLLAMA_ORIGINS="https://${this.domain}"; ollama serve
 </code></pre>
               <br/>
             </div>
@@ -86,7 +89,7 @@ $env:OLLAMA_ORIGINS="https://freedomson.github.io"; ollama serve
                 MacOS Shell
               </summary>
 <pre><code class="language-shell">
-export OLLAMA_ORIGINS="https://freedomson.github.io" && ollama serve
+export OLLAMA_ORIGINS="https://${this.domain}" && ollama serve
 </pre></code>
               <br/>
             </div>
@@ -100,7 +103,7 @@ export OLLAMA_ORIGINS="https://freedomson.github.io" && ollama serve
                 Linux Shell
               </summary>
 <pre><code class="language-shell">
-export OLLAMA_ORIGINS="https://freedomson.github.io" && ollama serve
+export OLLAMA_ORIGINS="https://${this.domain}" && ollama serve
 </pre></code>
             </div>
           </div>
