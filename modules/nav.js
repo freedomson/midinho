@@ -4,11 +4,7 @@ import './query-models.js';
 import { picocss } from './style.js';
 export class Nav extends LitElement {
   
-  static styles = [picocss, css`
-        .md-nav-query-models {
-          min-width: 20rem;
-        }
-  `];
+  static styles = [picocss, css``];
   
   render() {
     return html`
@@ -19,15 +15,15 @@ export class Nav extends LitElement {
           </li>
         </ul>
         <ul>
-          <li class="md-nav-query-models">
-            <md-query-models></md-query-models>
+          <li>
+              <md-query-models></md-query-models>
           </li>
         </ul>
         <ul>
           <li>
-            <a alt="Github" href="https://github.com/freedomson/midinho">
-              <img id="github-logo" width="20" src="./css/github.png">
-            </a>
+              <a alt="Github" href="https://github.com/freedomson/midinho">
+                <img id="github-logo" width="20px" src="./css/github.png">
+              </a>
           </li>
         </ul>
       </nav>

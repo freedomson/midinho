@@ -154,7 +154,7 @@ export class QueryModels extends LitElement {
 
   render() {
     return html`
-      <div class="grid">
+      <fieldset role="group">
       ${
         this.showDownloadModel ?
           html `
@@ -167,7 +167,7 @@ export class QueryModels extends LitElement {
             ${this.getDownloadComponent()}
           `
       }
-      </div>
+      </fieldset>
     `;
   }
 }

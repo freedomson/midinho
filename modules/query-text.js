@@ -95,16 +95,14 @@ export class QueryText extends LitElement {
             ></textarea>
           `
         }
-        <div class="grid">
-        <md-query-start
-          .processQuery=${this.processQuery.bind(this)}
-          ></md-query-start>
-        <md-query-stop
-          .cancelCallBack=${this.cancelCallBack.bind(this)}
-          .pyodide=${this.pyodide}
-          ></md-query-stop>
-        <md-speak-selector></md-speak-selector>
-        <div>
+        <fieldset role="group">
+          <md-query-start
+            .processQuery=${this.processQuery.bind(this)}></md-query-start>
+          <md-query-stop
+            .cancelCallBack=${this.cancelCallBack.bind(this)}
+            .pyodide=${this.pyodide}></md-query-stop>
+          <md-speak-selector></md-speak-selector>
+        </fieldset>
         <br/>
         <br/>
     `;

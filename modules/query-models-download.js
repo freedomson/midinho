@@ -81,6 +81,12 @@ export class QueryModelsDownload extends LitElement {
         "context": "128K",
         "input": ["text"]
       },
+      {
+        "name": "codellama:7b",
+        "size": 3.8 * 1024 * 1024 * 1024,
+        "context": "16k",
+        "input": ["text"]
+      },
       // {
       //   "name": "mistral:7b",
       //   "size": 4.1 * 1024 * 1024 * 1024,

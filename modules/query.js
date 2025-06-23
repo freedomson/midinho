@@ -21,9 +21,6 @@ export class Query extends LitElement {
       float: left;
       width: 100%;
     }
-    .query-container-wrapper {
-      background-color: var(--pico-background-color);
-    }
   `];
 
   static properties = {
@@ -141,13 +138,11 @@ export class Query extends LitElement {
               ></md-search>
           `)}
         </div>
-        <div class="query-container-wrapper" >
-          <md-query-text
-            .cancelCallBack=${this.cancelCallBack.bind(this)}
-            .isLoading=${this.isLoading.bind(this)}
-            .submitQuery=${this.submitQuery.bind(this)}>
-          </md-query-text>
-        </div>
+        <md-query-text
+          .cancelCallBack=${this.cancelCallBack.bind(this)}
+          .isLoading=${this.isLoading.bind(this)}
+          .submitQuery=${this.submitQuery.bind(this)}>
+        </md-query-text>
     `;
   }
 }
