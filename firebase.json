@@ -6,6 +6,10 @@
       "**/.*",
       "**/.venv/**",
       "**/notebooks/**"
+    ],
+    "headers": [
+      { "source":"**/modules/**", "headers": [{"key": "Cache-Control", "value": "no-cache"}] },
+      { "source":"**/midinho/**", "headers": [{"key": "Cache-Control", "value": "no-cache"}] }
     ]
   }
 }
