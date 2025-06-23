@@ -26,10 +26,6 @@ class App extends LitElement {
   static styles = [picocss, css`
     .md-app-container-wrapper {
       min-width: 30rem;
-      max-width: 80vpw;
-    }
-    .md-app-container {
-
     }
   `];
 
@@ -127,7 +123,6 @@ class App extends LitElement {
       <link rel="stylesheet" href="./css/pico.sand.min.css">
 
       <div class="md-app-container-wrapper">
-      <div class="md-app-container">
 
       ${
         this._loadPythonSourceCodeTask.render({
@@ -144,7 +139,6 @@ class App extends LitElement {
           `,
         })
       }
-      </div>
       </div>
     `;
   }
