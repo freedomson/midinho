@@ -33,16 +33,21 @@ export class Header extends LitElement {
   }
 
   onChange(){
-    let speaker = this.getSelectedWorker()
-    switch (speaker) {
+    let lang = this.getSelectedWorker()
+    switch (lang) {
       case "":
         store.setSpeakerWorker(false);
         store.setSpeak(false);
         break;
       default:
-        let worker = new Worker(`/modules/tts/audioWorker_${speaker}.js`);
+        let worker = new Worker(`/modules/tts/audioWorker.js`);
+        worker.postMessage({lang,init:true});
         store.setSpeakerWorker(worker);
         store.setSpeak(true);
+        store.setLoading(true);
+          worker.onmessage = ((e) => {
+          store.setLoading(e.data.status);
+        })
         break;
     }
   }

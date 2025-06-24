@@ -7,9 +7,11 @@ import './query-models-download.js';
 import './header.js';
 import './nav.js';
 import './error.js';
+import './loading.js';
 import { pyodideContext, ollamamodelsContext } from './context.js';
 import { provide } from './node_modules/@lit-labs/context/index.js';
 import { picocss } from './style.js';
+import { store } from './store.js';
 class App extends LitElement {
 
   static properties = {
@@ -66,7 +68,7 @@ class App extends LitElement {
     // console.log(micropip.freeze())
     await this.pyodide.runPythonAsync(`
       from pyodide.http import pyfetch
-      response = await pyfetch("midinho/python/llm.py")
+      response = await pyfetch("python/llm.py")
       with open("llm.py", "wb") as f:
           f.write(await response.bytes())
 
@@ -87,9 +89,11 @@ class App extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     this.addEventListener('update-models', this.handleUpdateModels);
+    store.subscribe(this);
   }
 
   disconnectedCallback() {
+    store.unsubscribe(this);
     this.removeEventListener('update-models', this.handleUpdateModels);
     super.disconnectedCallback();
   }
@@ -121,9 +125,7 @@ class App extends LitElement {
   render() {
     return html`
       <link rel="stylesheet" href="./css/pico.sand.min.css">
-
       <div class="md-app-container-wrapper">
-
       ${
         this._loadPythonSourceCodeTask.render({
           initial: () => html`<br /><p>Waiting to start task</p>`,
@@ -138,6 +140,12 @@ class App extends LitElement {
             <md-error .error=${error}></md-error>
           `,
         })
+      }
+      ${
+        // Generic loading capability
+        // Used after first load
+        // TODO: Single load component
+        store.loading ? html `<md-loading .loading=${store.loading}></md-loading>`: ``
       }
       </div>
     `;

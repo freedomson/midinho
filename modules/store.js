@@ -1,9 +1,15 @@
 class Store {
   constructor() {
+    this.loading = false;
     this.model = false;
     this.speak = false;
     this.speakerWorker = false
     this._subscribers = new Set();
+  }
+
+  setLoading(value) {
+    this.loading = value;
+    this._notify();
   }
 
   setModel(value) {

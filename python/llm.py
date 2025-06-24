@@ -21,7 +21,6 @@ keepalive = "10m"
 def create_chain(model, callback, donecallback):
     my_handler = MyStreamingHandler()
     my_handler.setMsgCallback(callback, donecallback)
-    prompt = PromptTemplate.from_template("Answer user query: {query}")
     llm = ChatOllama(
         model=model, # "llama3:latest",
         streaming=True,

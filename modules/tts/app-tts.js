@@ -8,13 +8,14 @@ Module = {};
 
 // https://emscripten.org/docs/api_reference/module.html#Module.locateFile
 Module.locateFile = function(path, scriptDirectory = '') {
-  console.log(`path: ${path}, scriptDirectory: ${scriptDirectory}`);
-  return './en_US/' + path;
+  // console.log(`path: ${path}, scriptDirectory: ${scriptDirectory}`);
+  return `./models/${lang}/${path}`;
 };
 
 // https://emscripten.org/docs/api_reference/module.html#Module.locateFile
 Module.setStatus = function(status) {
-  console.log(`status ${status}`);
+  // console.log(`status ${status}`,status);
+  self.postMessage({status});
   // const statusElement = document.getElementById('status');
   // if (status == "Running...") {
   //   status = 'Model downloaded. Initializing text to speech model...'
@@ -36,9 +37,8 @@ Module.setStatus = function(status) {
 };
 
 Module.onRuntimeInitialized = function() {
-  console.log('Model files downloaded!');
-
-  console.log('Initializing tts ......');
+  //console.log('Model files downloaded!');
+  // console.log('Initializing tts ......');
   tts = createOfflineTts(Module)
   // if (tts.numSpeakers > 1) {
   //   speakerIdLabel.innerHTML = `Speaker ID (0 - ${tts.numSpeakers - 1}):`;

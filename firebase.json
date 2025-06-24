@@ -8,8 +8,11 @@
       "**/notebooks/**"
     ],
     "headers": [
-      { "source":"modules/**", "headers": [{"key": "Cache-Control", "value": "no-cache, no-store, must-revalidate"}] },
-      { "source":"midinho/**", "headers": [{"key": "Cache-Control", "value": "no-cache, no-store, must-revalidate"}] }
+      { "source":"modules/*", "headers": [{"key": "Cache-Control", "value": "public, max-age=600"}] },
+      { "source":"modules/node_modules/**", "headers": [{"key": "Cache-Control", "value": "public, max-age=600"}] },
+      { "source":"modules/tts/*", "headers": [{"key": "Cache-Control", "value": "public, max-age=600"}] },
+      { "source":"modules/tts/models/**", "headers": [{"key": "Cache-Control", "value": "no-cache, no-store, must-revalidate"}] },
+      { "source":"python/**", "headers": [{"key": "Cache-Control", "value": "public, max-age=600"}] }
     ]
   }
 }

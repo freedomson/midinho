@@ -1,9 +1,19 @@
 // audioWorker.js
+var lang = ""
+
 self.onmessage = function (e) {
+
+  if (e.data?.init) {
+    console.log("Initialize worker")
+    lang = e.data.lang
+    importScripts('./app-tts.js');
+    importScripts('./sherpa-onnx-tts.js');
+    importScripts(`./models/${lang}/sherpa-onnx-wasm-main-tts.js`);
+    return;
+  }
+
   const { speachStr, speachStrTokens, final } = e.data;
-  console.log("GENERATING")
   const audioNode = generateAudioNode(speachStr);
-  console.log("GENERATED")
   self.postMessage({...audioNode, speachStrTokens, final});
 };
 
