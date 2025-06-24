@@ -1,6 +1,17 @@
 // audioWorker.js
 var lang = ""
 
+function generateBtn(text) {
+  let speakerId = 0
+  let speedInput = 1
+  let audio = tts.generate({text : text, sid : speakerId, speed : speedInput});
+  return {audio,sampleRate: tts.sampleRate};
+}
+
+function generateAudioNode(str) {
+  return generateBtn(str);
+}
+
 self.onmessage = function (e) {
 
   if (e.data?.init) {
@@ -16,14 +27,3 @@ self.onmessage = function (e) {
   const audioNode = generateAudioNode(speachStr);
   self.postMessage({...audioNode, speachStrTokens, final});
 };
-
-function generateBtn(text) {
-  let speakerId = 0
-  let speedInput = 1
-  let audio = tts.generate({text : text, sid : speakerId, speed : speedInput});
-  return {audio,sampleRate: tts.sampleRate};
-}
-
-function generateAudioNode(str) {
-  return generateBtn(str);
-}
