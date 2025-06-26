@@ -1,5 +1,6 @@
 import { LitElement, html, css } from './node_modules/lit-element/lit-element.js'
 import { picocss, picocsscolors } from './style.js';
+import { marked } from '../static/marked.esm.js'
 export class Search extends LitElement {
 
   static styles = [picocss, picocsscolors,  css`
@@ -47,15 +48,10 @@ export class Search extends LitElement {
     this.speachStringQueue = [];
     this.isSpeaking = false;
 
-    // https://showdownjs.com/docs/available-options
-    this.converter = new showdown.Converter({
-      tables: true
-      // ghCodeBlocks: false,
-      // simplifiedAutoLink: true,
-      // strikethrough: true,
-      // tasklists: true,
-      // underline: true
-    });
+    this.elements = []
+    this.printingCode = false
+    this.writer = false
+
     this.audioCtx = false
   }
 
@@ -147,12 +143,56 @@ export class Search extends LitElement {
     }
   }
 
+  createWriter() {
+    let writer = {
+      el: document.createElement('div'),
+      text: "",
+      type: this.printingCode ? 'code' : 'text',
+    }
+    this.elements.push(writer)
+    let containerEl = this.renderRoot.getElementById("search-response")
+    containerEl.appendChild(writer.el);
+    return writer
+  }
+
+  isCode(token){
+    return (token=='```');
+  }
+
+  getLastWriter(){
+    return this.elements[this.elements.length - 1];
+  }
+
   printText(token){
+    console.log(token)
+
+    if (!this.elements.length){
+      this.writer = this.createWriter()
+    } else if (this.isCode(token) && !this.printingCode) {
+      this.printingCode = true
+      this.writer = this.createWriter()
+    } else if (this.isCode(token) && this.printingCode) {
+      this.printingCode = false
+      this.writer = this.getLastWriter()
+      this.createWriter()
+    } else {
+      this.writer = this.getLastWriter()
+    }
+
     this.msg.response += token;
+    this.writer.text += token;
     let aBottom = this.isAtBottom()
-    let el = this.renderRoot.getElementById("search-response")
-    el.innerHTML = this.converter.makeHtml(this.msg.response)
-    Prism.highlightAllUnder(el)
+
+    switch (this.writer.type) {
+      case 'code':
+        this.writer.el.innerHTML = marked.parse(this.writer.text)
+        Prism.highlightAllUnder(this.writer.el)
+        break;
+      default:
+        this.writer.el.innerHTML = marked.parse(this.writer.text)
+        break;
+    }
+
     if (aBottom) {
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
     }
@@ -184,7 +224,8 @@ export class Search extends LitElement {
     } catch (error) {
       console.log(error)
     }
-    this.worker.onmessage = () => {}
+    if(this.worker)
+      this.worker.onmessage = () => {}
     this.loading = false;
     this.processedQ = [];
     cb()
