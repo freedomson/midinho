@@ -51,6 +51,7 @@ export class Search extends LitElement {
     this.elements = []
     this.printingCode = false
     this.writer = false
+    this.previousToken = ''
 
     this.audioCtx = false
   }
@@ -155,23 +156,30 @@ export class Search extends LitElement {
     return writer
   }
 
-  isCode(token){
-    return (token=='```');
+  isCode(token,previousToken){
+    if (previousToken.trim() == '```') {
+      return false;
+    }
+    if (token.trim() == '```' || previousToken.trim() + token.trim() == '```') {
+      return true
+    }
   }
 
   getLastWriter(){
     return this.elements[this.elements.length - 1];
   }
 
-  printText(token){
-    console.log(token)
+  printText(token) {
+
+    let previousToken = this.previousToken
+    this.previousToken = token
 
     if (!this.elements.length){
       this.writer = this.createWriter()
-    } else if (this.isCode(token) && !this.printingCode) {
+    } else if (this.isCode(token, previousToken) && !this.printingCode) {
       this.printingCode = true
       this.writer = this.createWriter()
-    } else if (this.isCode(token) && this.printingCode) {
+    } else if (this.isCode(token, previousToken) && this.printingCode) {
       this.printingCode = false
       this.writer = this.getLastWriter()
       this.createWriter()
