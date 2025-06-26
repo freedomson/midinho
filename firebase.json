@@ -11,7 +11,7 @@
       { "source":"modules/*", "headers": [{"key": "Cache-Control", "value": "public, max-age=600"}] },
       { "source":"modules/node_modules/**", "headers": [{"key": "Cache-Control", "value": "public, max-age=600"}] },
       { "source":"modules/tts/*", "headers": [{"key": "Cache-Control", "value": "public, max-age=600"}] },
-      { "source":"modules/tts/models/**", "headers": [{"key": "Cache-Control", "value": "no-cache, no-store, must-revalidate"}] },
+      { "source":"modules/tts/models/**", "headers": [{"key": "Cache-Control", "value": "public, max-age=86400"}] },
       { "source":"python/**", "headers": [{"key": "Cache-Control", "value": "public, max-age=600"}] }
     ]
   }
