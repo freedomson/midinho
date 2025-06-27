@@ -13,7 +13,7 @@ export class Header extends LitElement {
     super();
     this.speakers = [
       {
-        value: "",
+        value: "en_UK",
         name: "Only text"
       },
       {
@@ -34,6 +34,7 @@ export class Header extends LitElement {
 
   onChange(){
     let lang = this.getSelectedWorker()
+    store.setLang(lang);
     switch (lang) {
       case "":
         store.setSpeakerWorker(false);

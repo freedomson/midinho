@@ -31,9 +31,9 @@ def create_chain(model, callback, donecallback):
     )
     return llm
 
-async def run(user_query, pythonSelectedModel, callback, donecallback, cancelcallback, errorcallback):
+async def run(lang, user_query, pythonSelectedModel, callback, donecallback, cancelcallback, errorcallback):
     try:
-        user_prompt = PromptTemplate.from_template("Answer user query: {query}")
+        user_prompt = PromptTemplate.from_template("Answer user query in " + lang + ": {query}")
         formatted_query = user_prompt.format(query=user_query)
         chat_history.append(HumanMessage(content=formatted_query))
         chain = create_chain(pythonSelectedModel, callback, donecallback)
@@ -47,7 +47,7 @@ async def run(user_query, pythonSelectedModel, callback, donecallback, cancelcal
         print(f">Calling error callback")
         errorcallback(e)
 
-def run_query(user_query, pythonSelectedModel, callback , donecallback, cancelcallback, errorcallback):
+def run_query(lang, user_query, pythonSelectedModel, callback , donecallback, cancelcallback, errorcallback):
   return asyncio.create_task(
-          run(user_query, pythonSelectedModel, callback , donecallback, cancelcallback, errorcallback)
+          run(lang, user_query, pythonSelectedModel, callback , donecallback, cancelcallback, errorcallback)
         )

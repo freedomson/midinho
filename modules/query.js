@@ -77,7 +77,8 @@ export class Query extends LitElement {
       // Set bridge vars
       window.pythonQueryStr = msg.query;
       window.pythonSelectedModel = selectedModel
-      window.Prism = Prism
+      window.Prism = Prism;
+      window.lang = store.lang;
 
       // Update UI with message
       await this.requestUpdate();
@@ -112,9 +113,9 @@ export class Query extends LitElement {
           });
 
       this.pyodide.runPythonAsync(`
-        from js import pythonQueryStr, pythonSelectedModel, Prism
+        from js import pythonQueryStr, pythonSelectedModel, Prism, lang
         try:
-          llm.task = llm.run_query(pythonQueryStr, pythonSelectedModel, callback, donecallback, cancelcallback, errorcallback)
+          llm.task = llm.run_query(lang, pythonQueryStr, pythonSelectedModel, callback, donecallback, cancelcallback, errorcallback)
         except Exception as e:
             print("Caught a generic exception:", e)
       `)
