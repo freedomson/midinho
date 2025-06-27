@@ -57,6 +57,10 @@ export class Search extends LitElement {
   }
 
   firstUpdated() {
+    let containerEl = this.renderRoot.getElementById("search-query")
+    let q = this.msg.query.replace(/\n/g, "<br>")
+    containerEl.innerHTML = q
+
     if(this.worker)
       this.worker.onmessage = ((e) => {
         const audio = e.data.audio;
@@ -238,12 +242,6 @@ export class Search extends LitElement {
     this.loading = false;
     this.processedQ = [];
     cb()
-  }
-
-  firstUpdated(){
-    let containerEl = this.renderRoot.getElementById("search-query")
-    let q = this.msg.query.replace(/\n/g, "<br>")
-    containerEl.innerHTML = q
   }
 
   render() {
