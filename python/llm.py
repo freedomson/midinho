@@ -15,8 +15,8 @@ class MyStreamingHandler(BaseCallbackHandler):
       self.donecallback()
 
 chat_history = []
-timeout = 360
-keepalive = "10m"
+timeout = 30
+keepalive = "24h"
 
 def create_chain(model, callback, donecallback):
     my_handler = MyStreamingHandler()
@@ -31,7 +31,7 @@ def create_chain(model, callback, donecallback):
     )
     return llm
 
-async def run(user_query, pythonSelectedModel, callback, donecallback, cancelcallback=None):
+async def run(user_query, pythonSelectedModel, callback, donecallback, cancelcallback, errorcallback):
     try:
         user_prompt = PromptTemplate.from_template("Answer user query: {query}")
         formatted_query = user_prompt.format(query=user_query)
@@ -40,13 +40,14 @@ async def run(user_query, pythonSelectedModel, callback, donecallback, cancelcal
         response = await chain.ainvoke(chat_history, config={"timeout": timeout})
         chat_history.append(AIMessage(content=response.content))
     except asyncio.CancelledError:
-        if cancelcallback:
-            cancelcallback("Task was cancelled.")
+        cancelcallback("Task was cancelled.")
     except Exception as e:
         # Handle other exceptions if needed
-        print(f"Error: {e}")
+        print(f">Error: {e}")
+        print(f">Calling error callback")
+        errorcallback(e)
 
-def run_query(user_query, pythonSelectedModel, callback , donecallback, cancelcallback):
+def run_query(user_query, pythonSelectedModel, callback , donecallback, cancelcallback, errorcallback):
   return asyncio.create_task(
-          run(user_query, pythonSelectedModel, callback , donecallback, cancelcallback)
+          run(user_query, pythonSelectedModel, callback , donecallback, cancelcallback, errorcallback)
         )

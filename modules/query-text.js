@@ -22,12 +22,17 @@ export class QueryText extends LitElement {
   constructor() {
     super();
     this.disabled = false
+    this.errorMsg = false
     this.placeholder = 'Ask anything';
   }
 
   firstUpdated() {
     this.textarea = this.renderRoot.getElementById('md-query-text');
     this.textarea.focus();
+  }
+
+  updated(){
+    this.textarea = this.renderRoot.getElementById('md-query-text');
     this.start = this.shadowRoot.querySelector('md-query-start');
     this.stop = this.shadowRoot.querySelector('md-query-stop');
   }
@@ -56,13 +61,18 @@ export class QueryText extends LitElement {
       this.submitQuery(this.textarea.value)
       this.disable()
       this.textarea.value = ""
+      this.setErrorMsg("")
     }
   }
 
   enable(){
-    this.textarea.value = ""
     this.start.setDisable(true)
     this.stop.setDisable(true)
+  }
+
+  setErrorMsg(e){
+    this.errorMsg = e;
+    this.requestUpdate();
   }
 
   disable(){
@@ -71,30 +81,48 @@ export class QueryText extends LitElement {
     this.stop.setDisable(false)
   }
 
+  renderText() {
+    if (this.errorMsg) {
+      return html `
+          <textarea
+            class="outline"
+            id="md-query-text"
+            aria-invalid="true"
+            placeholder="${this.placeholder}"
+            aria-label="${this.placeholder}"
+            @keyup=${this.handleKeyup}
+          ></textarea>
+        <small id="invalid-helper">${this.errorMsg}</small>
+        `
+    } else {
+      let out = this.disabled ?
+        html `
+          <textarea
+            class="outline"
+            disabled
+            id="md-query-text"
+            placeholder="${this.placeholder}"
+            aria-label="${this.placeholder}"
+            @keyup=${this.handleKeyup}
+          ></textarea>
+        `
+        :
+        html `
+          <textarea
+            class="outline"
+            id="md-query-text"
+            placeholder="${this.placeholder}"
+            aria-label="${this.placeholder}"
+            @keyup=${this.handleKeyup}
+          ></textarea>
+        `
+      return out;
+    }
+  }
+
   render() {
     return html`
-        ${ this.disabled ?
-          html `
-            <textarea
-              class="outline"
-              disabled
-              id="md-query-text"
-              placeholder="${this.placeholder}"
-              aria-label="${this.placeholder}"
-              @keyup=${this.handleKeyup}
-            ></textarea>
-          `
-          :
-          html `
-            <textarea
-              class="outline"
-              id="md-query-text"
-              placeholder="${this.placeholder}"
-              aria-label="${this.placeholder}"
-              @keyup=${this.handleKeyup}
-            ></textarea>
-          `
-        }
+        ${ this.renderText() }
         <fieldset role="group">
           <md-query-start
             .processQuery=${this.processQuery.bind(this)}></md-query-start>

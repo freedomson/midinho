@@ -105,22 +105,38 @@ export class Query extends LitElement {
           "cancelcallback",
           () => {});
 
+        this.pyodide.globals.set(
+          "errorcallback",
+          (e) => {
+            this.errorCallBack.bind(this)(e)
+          });
+
       this.pyodide.runPythonAsync(`
         from js import pythonQueryStr, pythonSelectedModel, Prism
         try:
-          llm.task = llm.run_query(pythonQueryStr, pythonSelectedModel, callback, donecallback, cancelcallback)
+          llm.task = llm.run_query(pythonQueryStr, pythonSelectedModel, callback, donecallback, cancelcallback, errorcallback)
         except Exception as e:
             print("Caught a generic exception:", e)
       `)
 
   }
 
-  cancelCallBack(){
+  cancelCallBack(e){
     let msgEl = this.renderRoot.getElementById(`md-search-${this.msgs.length}`);
+    let error = e;
     msgEl.cancel.bind(msgEl)((()=>{
       this.setLoading(false)
       this.mdQueryText.enable()
+      if (error) {
+        this.mdQueryText.setErrorMsg(error)
+      }
     }).bind(this))
+  }
+
+  errorCallBack(e){
+    console.log(`Calling error calback ${e}`)
+    this.setLoading(false)
+    this.cancelCallBack(e)
   }
 
   render() {

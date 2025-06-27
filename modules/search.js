@@ -227,7 +227,8 @@ export class Search extends LitElement {
   cancel(cb) {
     try {
       if (this.audioCtx.state !== 'closed') {
-        this.audioCtx.close().catch(console.error);
+        if (this.audioCtx.close)
+          this.audioCtx.close().catch(console.error);
       }
     } catch (error) {
       console.log(error)
@@ -239,12 +240,18 @@ export class Search extends LitElement {
     cb()
   }
 
+  firstUpdated(){
+    let containerEl = this.renderRoot.getElementById("search-query")
+    let q = this.msg.query.replace(/\n/g, "<br>")
+    containerEl.innerHTML = q
+  }
+
   render() {
     return html`
       <link rel="stylesheet" href="./css/prism.css">
       <div class="search-container">
         <div class="search-header-container">
-          <div id="search-query" class="pico-background-sand-50">${this.msg.query}</div>
+          <div id="search-query" class="pico-background-sand-50"></div>
         </div>
         <div id="search-response">
         </div>
