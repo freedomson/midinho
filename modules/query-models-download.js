@@ -82,6 +82,12 @@ export class QueryModelsDownload extends LitElement {
         "input": ["text"]
       },
       {
+        "name": "llama3.2:3b",
+        "size": 2 * 1024 * 1024 * 1024,
+        "context": "128K",
+        "input": ["text"]
+      },
+      {
         "name": "codellama:7b",
         "size": 3.8 * 1024 * 1024 * 1024,
         "context": "16k",
@@ -96,6 +102,12 @@ export class QueryModelsDownload extends LitElement {
       {
         "name": "deepseek-r1:14b",
         "size": 9.0 * 1024 * 1024 * 1024,
+        "context": "128K",
+        "input": ["text"]
+      },
+      {
+        "name": "deepseek-r1:1.5b",
+        "size": 1.1 * 1024 * 1024 * 1024,
         "context": "128K",
         "input": ["text"]
       },
