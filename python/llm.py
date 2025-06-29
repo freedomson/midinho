@@ -15,7 +15,7 @@ class MyStreamingHandler(BaseCallbackHandler):
       self.donecallback()
 
 chat_history = []
-timeout = 30
+timeout = 600
 keepalive = "24h"
 
 def create_chain(model, callback, donecallback):
