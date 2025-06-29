@@ -31,9 +31,19 @@ def create_chain(model, callback, donecallback):
     )
     return llm
 
+def getPromptByLanguage(lang_code):
+  match lang_code:
+    case "pt_PT":
+      prompt = "Renponde à pergunta do utilizador em português: {query}"
+    case "en_US":
+      prompt = "Answer user query in english american: {query}"
+    case _:
+      prompt = "Answer user query in english: {query}"
+  return PromptTemplate.from_template(prompt)
+
 async def run(lang, user_query, pythonSelectedModel, callback, donecallback, cancelcallback, errorcallback):
     try:
-        user_prompt = PromptTemplate.from_template("Answer user query in " + lang + ": {query}")
+        user_prompt = getPromptByLanguage(lang)
         formatted_query = user_prompt.format(query=user_query)
         chat_history.append(HumanMessage(content=formatted_query))
         chain = create_chain(pythonSelectedModel, callback, donecallback)
