@@ -3,7 +3,7 @@ class Store {
     this.loading = false;
     this.model = false;
     this.speak = false;
-    this.lang = "en_UK";
+    this.lang = "";
     this.speakerWorker = false
     this._subscribers = new Set();
   }

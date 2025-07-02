@@ -36,9 +36,9 @@ def getPromptByLanguage(lang_code):
     case "pt_PT":
       prompt = "Renponde à pergunta do utilizador em português: {query}"
     case "en_US":
-      prompt = "Answer user query in english american: {query}"
-    case _:
       prompt = "Answer user query in english: {query}"
+    case _:
+      prompt = "{query}"
   return PromptTemplate.from_template(prompt)
 
 async def run(lang, user_query, pythonSelectedModel, callback, donecallback, cancelcallback, errorcallback):

@@ -13,7 +13,7 @@ export class Header extends LitElement {
     super();
     this.speakers = [
       {
-        value: "en_UK",
+        value: "",
         name: "Only text"
       },
       {

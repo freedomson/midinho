@@ -17,7 +17,6 @@ export class Header extends LitElement {
   render() {
     return html`
       <h1 class="header">Midinho</h1>
-      </footer>
     `;
   }
 }

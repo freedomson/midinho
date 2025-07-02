@@ -25,11 +25,7 @@ class App extends LitElement {
     this.ollamamodels = [];
   }
 
-  static styles = [picocss, css`
-    .md-app-container-wrapper {
-      min-width: 30rem;
-    }
-  `];
+  static styles = [picocss, css``];
 
   async getOllamaModels() {
     await OllamaApi.getOllamaModels();
