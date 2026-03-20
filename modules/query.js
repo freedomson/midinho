@@ -143,7 +143,7 @@ export class Query extends LitElement {
   render() {
     return html`
         <p class="md-query-welcome">
-          ${this.messageWelcome}
+          <b>${this.messageWelcome}</b>
         </p>
         <div id="query-response">
           ${this.msgs.map((msg, index) => html`

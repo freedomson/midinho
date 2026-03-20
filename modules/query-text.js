@@ -131,6 +131,7 @@ export class QueryText extends LitElement {
             .pyodide=${this.pyodide}></md-query-stop>
           <md-speak-selector></md-speak-selector>
         </fieldset>
+        <div>AI-generated content may be incorrect</div>
         <br/>
         <br/>
     `;

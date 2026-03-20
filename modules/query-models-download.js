@@ -13,9 +13,10 @@ export class QueryModelsDownload extends LitElement {
       min-width: 3rem;
     }
     #md-query-models-download-img{
-      height: 20px;
-      width: 20px;
+      height: 25px;
+      width: 25px;
       background-color: light-dark(transparent, #ffffff);
+      padding: 5px;
     }
     #md-query-models-download-status-progress{
       text-align: right;
