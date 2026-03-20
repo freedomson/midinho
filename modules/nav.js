@@ -3,9 +3,14 @@ import './header.js';
 import './query-models.js';
 import { picocss } from './style.js';
 export class Nav extends LitElement {
-  
-  static styles = [picocss, css``];
-  
+
+  static styles = [picocss,css`
+    nav {
+      text-align: center;
+      display: block ruby;
+    }
+  `];
+
   render() {
     return html`
       <md-header></md-header>
@@ -13,18 +18,6 @@ export class Nav extends LitElement {
         <ul>
           <li>
               <md-query-models></md-query-models>
-          </li>
-        </ul>
-        <ul>
-          <li>
-              <a alt="Github" href="https://github.com/freedomson/midinho">
-                <img id="github-logo" width="20px" src="./css/github.png">
-              </a>
-          </li>
-          <li>
-              <a alt="Android" href="/static/midinho-app_apt-android-7-release_universal.apk">
-                <img id="github-logo" width="20px" src="./css/android.svg">
-              </a>
           </li>
         </ul>
       </nav>

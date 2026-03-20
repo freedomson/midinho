@@ -15,6 +15,7 @@ export class QueryModelsDownload extends LitElement {
     #md-query-models-download-img{
       height: 20px;
       width: 20px;
+      background-color: light-dark(transparent, #ffffff);
     }
     #md-query-models-download-status-progress{
       text-align: right;
@@ -292,8 +293,6 @@ export class QueryModelsDownload extends LitElement {
               <tr>
                 <th scope="col">Model</th>
                 <th scope="col">Size</th>
-                <th scope="col">Context</th>
-                <th scope="col">Input</th>
                 <th scope="col"></th>
               </tr>
             </thead>
@@ -305,8 +304,6 @@ export class QueryModelsDownload extends LitElement {
                       <a href="https://ollama.com/library/${model.name}">${model.name}</a>
                     </th>
                     <td>${this.roundTo2Decimals(model.size / 1024 / 1024 / 1024)} GB</td>
-                    <td>${model.context ? model.context : "n.a."}</td>
-                    <td>${model.input ? model.input.join(", ") : "n.a."}</td>
                     <td>
                         ${
                           !OllamaApi.models.some(current => current.name === model.name) ?
@@ -339,10 +336,7 @@ export class QueryModelsDownload extends LitElement {
           <footer>
             <div class="grid">
               <div>
-                <mark>Large models cannot be installed via browser!</mark>
-              </div>
-              <div>
-                Browse all available Ollama models <a href="https://ollama.com/search">here</a>.
+                <mark>Check your phone available memory!</mark>
               </div>
             </div>
           </footer>
