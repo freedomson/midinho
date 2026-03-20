@@ -46,35 +46,23 @@ export class QueryModelsDownload extends LitElement {
     this.downloadingProgressStatusProgress = "";
     this.defaultModels = [
       {
-        "name": "mathstral:7b",
-        "size":  4.1 * 1024 * 1024 * 1024,
-        "context": "32K",
-        "input": ["text"]
-      },
-      {
-        "name": "llava:7b",
-        "size": 4.7 * 1024 * 1024 * 1024,
-        "context": "32K",
-        "input": ["text","image"]
-      },
-      {
-        "name": "smollm:135m",
-        "size": 0.092 * 1024 * 1024 * 1024,
-        "context": "2K",
-        "input": ["text"]
-      },
-      {
         "name": "smollm2:135m",
         "size": 0.271 * 1024 * 1024 * 1024,
         "context": "8K",
         "input": ["text"]
       },
-      // {
-      //   "name": "deepseek-r1:8b",
-      //   "size": 5.2 * 1024 * 1024 * 1024,
-      //   "context": "128K",
-      //   "input": ["text"]
-      // },
+      {
+        "name": "gemma3:4b",
+        "size": 3.3 * 1024 * 1024 * 1024,
+        "context": "128K",
+        "input": ["text","image"]
+      },
+      {
+        "name": "gemma3:12b",
+        "size": 8.1 * 1024 * 1024 * 1024,
+        "context": "128K",
+        "input": ["text","image"]
+      },
       {
         "name": "llama3.1:8b",
         "size": 4.9 * 1024 * 1024 * 1024,
@@ -88,18 +76,6 @@ export class QueryModelsDownload extends LitElement {
         "input": ["text"]
       },
       {
-        "name": "codellama:7b",
-        "size": 3.8 * 1024 * 1024 * 1024,
-        "context": "16k",
-        "input": ["text"]
-      },
-      // {
-      //   "name": "mistral:7b",
-      //   "size": 4.1 * 1024 * 1024 * 1024,
-      //   "context": "30K",
-      //   "input": ["text"]
-      // },
-      {
         "name": "deepseek-r1:14b",
         "size": 9.0 * 1024 * 1024 * 1024,
         "context": "128K",
@@ -112,16 +88,16 @@ export class QueryModelsDownload extends LitElement {
         "input": ["text"]
       },
       {
-        "name": "gemma3:4b",
-        "size": 3.3 * 1024 * 1024 * 1024,
-        "context": "128K",
-        "input": ["text", "image"]
-      },
-      {
         "name": "qwen3:8b",
         "size":  5.2 * 1024 * 1024 * 1024,
         "context": "40K",
         "input": ["text"]
+      },
+      {
+        "name": "qwen3.5:9b",
+        "size":  6.6 * 1024 * 1024 * 1024,
+        "context": "256K",
+        "input": ["text,image"]
       }
     ];
   }
