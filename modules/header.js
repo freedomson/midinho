@@ -16,7 +16,7 @@ export class Header extends LitElement {
 
   render() {
     return html`
-      <h1 class="header">Midinho</h1>
+      <h1 class="header">Doomai</h1>
     `;
   }
 }
