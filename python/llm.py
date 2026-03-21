@@ -22,9 +22,8 @@ class MyStreamingHandler(BaseCallbackHandler):
 # ------------------------
 # Config
 # ------------------------
-timeout = 600
-keepalive = "24h"
-
+timeout = 1000
+keepalive = -1
 
 def create_chain(model, callback, donecallback):
     my_handler = MyStreamingHandler()
@@ -36,7 +35,10 @@ def create_chain(model, callback, donecallback):
         callbacks=[my_handler],
         verbose=False,
         keep_alive=keepalive,
-        timeout=timeout
+        timeout=timeout,  # for internal usage
+        client_kwargs={"timeout": timeout},          # sync client
+        async_client_kwargs={"timeout": timeout},   # async client
+        sync_client_kwargs={"timeout": timeout}     # explicit sync client
     )
     return llm
 
@@ -54,19 +56,23 @@ def getPromptByLanguage(lang_code):
 # Core run function
 # ------------------------
 async def run(lang, user_query, model, callback, donecallback, cancelcallback, errorcallback):
-    chat_history = []  # ✅ not global
 
     try:
+        # Prepare only the last user prompt
         user_prompt = getPromptByLanguage(lang)
         formatted_query = user_prompt.format(query=user_query)
 
-        chat_history.append(HumanMessage(content=formatted_query))
+        # Keep history with only the last user message
+        chat_history = [HumanMessage(content=formatted_query)]
 
+        # Create the chain
         chain = create_chain(model, callback, donecallback)
 
+        # Call the chain
         response = await chain.ainvoke(chat_history, config={"timeout": timeout})
 
-        chat_history.append(AIMessage(content=response.content))
+        # Replace history with only the last AI response
+        chat_history = [AIMessage(content=response.content)]
 
     except asyncio.CancelledError:
         try:
@@ -77,12 +83,6 @@ async def run(lang, user_query, model, callback, donecallback, cancelcallback, e
 
     except Exception as e:
         print(f">Error: {e}")
-
-        try:
-            callback(f"\n[ERROR] {str(e)}\n")
-        except:
-            pass
-
         errorcallback(e)
 
     finally:
