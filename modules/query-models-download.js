@@ -263,7 +263,7 @@ export class QueryModelsDownload extends LitElement {
               <div align="right">
                 ${
                   !this.ollamamodels.length ?
-                    html `<mark>No models found! Please install from the list!</mark>`
+                    html `<mark>No module installed yet!</mark>`
                     :
                     this.busy ?
                       ""

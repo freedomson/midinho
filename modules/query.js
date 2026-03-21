@@ -45,6 +45,7 @@ export class Query extends LitElement {
     this.msgs = [];
     this.msgsRefs = []
     this.loading = false
+    this.query = ""
   }
 
   firstUpdated() {
@@ -62,7 +63,7 @@ export class Query extends LitElement {
   async submitQuery(query) {
 
       this.setLoading(true)
-
+      this.query = query
       // Construct message
       let selectedModel = store.model
       let msg = {
@@ -135,7 +136,14 @@ export class Query extends LitElement {
   }
 
   errorCallBack(e){
-    console.log(`Calling error calback ${e}`)
+    let errorText = `Engine error detected. Please try again or restart application. ${e}`
+    console.log(errorText)
+    let msgEl = this.renderRoot.getElementById(`md-search-${this.msgs.length}`)
+    msgEl.write.bind(msgEl)(errorText)
+    this.mdQueryText.updateContent(this.query)
+    setTimeout((()=> {
+      this.mdQueryText.enableOnError()
+    }).bind(this),0)
     this.setLoading(false)
     this.cancelCallBack(e)
   }

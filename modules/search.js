@@ -22,8 +22,6 @@ export class Search extends LitElement {
       border-radius: 1rem;
       padding-top: 1rem;
       float: left;
-      text-align: justify;
-      width: 80vw;
     }
     .search-response-loading {
       border-radius: 1rem;

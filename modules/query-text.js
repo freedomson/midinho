@@ -11,6 +11,9 @@ export class QueryText extends LitElement {
       #md-query-text{
         min-height: 3rem;
       }
+      .aiwarn {
+        text-align: center
+      }
     `];
 
   static properties = {
@@ -35,6 +38,10 @@ export class QueryText extends LitElement {
     this.textarea = this.renderRoot.getElementById('md-query-text');
     this.start = this.shadowRoot.querySelector('md-query-start');
     this.stop = this.shadowRoot.querySelector('md-query-stop');
+  }
+
+  updateContent(content){
+    this.textarea.value = content
   }
 
   isEmptyAfterTrim(str) {
@@ -67,6 +74,11 @@ export class QueryText extends LitElement {
 
   enable(){
     this.start.setDisable(true)
+    this.stop.setDisable(true)
+  }
+
+  enableOnError(){
+    this.start.setDisable(false)
     this.stop.setDisable(true)
   }
 
@@ -131,7 +143,7 @@ export class QueryText extends LitElement {
             .pyodide=${this.pyodide}></md-query-stop>
           <md-speak-selector></md-speak-selector>
         </fieldset>
-        <div>AI-generated content may be incorrect</div>
+        <div class="aiwarn">AI-generated content may be incorrect</div>
         <br/>
         <br/>
     `;

@@ -97,16 +97,16 @@ export class QueryModels extends LitElement {
         body: JSON.stringify({
           model: model,
           prompt: '',
-          keep_alive: '10m'
+          keep_alive: -1
         })
       });
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const reader = response.body.getReader();
-      const decoder = new TextDecoder();
+      // const decoder = new TextDecoder();
 
-      let result = '';
+      // let result = '';
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
