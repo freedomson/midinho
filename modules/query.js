@@ -101,21 +101,20 @@ export class Query extends LitElement {
           msgEl.end.bind(msgEl)((()=>{
             this.setLoading(false)
             this.mdQueryText.enable()
-            this.mdQueryText.enableClear()
           }).bind(this))
         });
 
         this.pyodide.globals.set(
           "cancelcallback",
           () => {
-            this.mdQueryText.enableClear()
+            this.mdQueryText.enable()
           });
 
         this.pyodide.globals.set(
           "errorcallback",
           (e) => {
             this.errorCallBack.bind(this)(e)
-            this.mdQueryText.enableClear()
+            this.mdQueryText.enable()
           });
 
       this.pyodide.runPythonAsync(`
@@ -139,9 +138,6 @@ export class Query extends LitElement {
     msgEl.cancel.bind(msgEl)((()=>{
       this.setLoading(false)
       this.mdQueryText.enable()
-      if (error) {
-        this.mdQueryText.setErrorMsg(error)
-      }
     }).bind(this))
   }
 
@@ -152,9 +148,8 @@ export class Query extends LitElement {
     msgEl.write.bind(msgEl)(errorText)
     this.mdQueryText.updateContent(this.query)
     setTimeout((()=> {
-      this.mdQueryText.enableOnError()
+      this.mdQueryText.enable()
     }).bind(this),0)
-    this.setLoading(false)
     this.cancelCallBack(e)
   }
 

@@ -43,10 +43,6 @@ export class QueryText extends LitElement {
     this.clear = this.shadowRoot.querySelector('md-query-clear');
   }
 
-  enableClear(){
-    this.clear.setDisable(false)
-  }
-
   disableClear(){
     this.clear.setDisable(true)
   }
@@ -77,24 +73,20 @@ export class QueryText extends LitElement {
       }
       this.submitQuery(this.textarea.value)
       this.disable()
+      this.setDisabled(true)
       this.textarea.value = ""
-      this.setErrorMsg("")
     }
+  }
+
+  setDisabled(status) {
+    this.disabled = status
   }
 
   enable(){
     this.start.setDisable(true)
     this.stop.setDisable(true)
-  }
-
-  enableOnError(){
-    this.start.setDisable(false)
-    this.stop.setDisable(true)
-  }
-
-  setErrorMsg(e){
-    this.errorMsg = e;
-    this.requestUpdate();
+    this.clear.setDisable(false)
+    this.setDisabled(false) 
   }
 
   disable(){
