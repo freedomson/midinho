@@ -26,6 +26,7 @@ export class QueryClear extends LitElement {
   execute(){
     this.pyodide.runPythonAsync(`
       try:
+        print(dir(llm))
         llm.chat_history = []
       except Exception as e:
           print(dir(llm))
