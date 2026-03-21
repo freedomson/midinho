@@ -2,10 +2,10 @@ import { LitElement, html, css } from './node_modules/lit-element/lit-element.js
 import { pyodideContext } from './context.js';
 import { consume } from './node_modules/@lit-labs/context/index.js';
 import { picocss } from './style.js';
-export class QueryStop extends LitElement {
+export class QueryClear extends LitElement {
 
   static styles = [picocss, css`
-    #md-query-stop-btn {
+    #md-query-clear-btn {
       float: left;
       margin-left: 0.5rem;
       margin-bottom: 0px;
@@ -14,26 +14,24 @@ export class QueryStop extends LitElement {
   `];
 
   static properties = {
-    disabled: {type: Boolean},
-    cancelCallBack: {type: Function}
+    disabled: {type: Boolean}
   };
 
   constructor() {
     super();
     this.disabled = true
-    this.text = 'Stop'
+    this.text = 'Clear'
   }
 
-  queryStop(){
-    this.cancelCallBack()
+  execute(){
     this.pyodide.runPythonAsync(`
       try:
-        llm.task.cancel()
-        callback(" CANCELLED")
-        cancelcallback("Task was cancelled.")
+        llm.chat_history = []
       except Exception as e:
+          print(dir(llm))
           print("Caught a generic exception:", e)
     `)
+    this.clearCallBack()
     this.setDisable(true)
   }
 
@@ -47,8 +45,8 @@ export class QueryStop extends LitElement {
         html `
           <div
             class="outline"
-            id="md-query-stop-btn"
-            @click=${this.queryStop.bind(this)}
+            id="md-query-clear-btn"
+            @click=${this.execute.bind(this)}
             disabled
             type="submit">
             ${this.text}
@@ -58,8 +56,8 @@ export class QueryStop extends LitElement {
         html `
           <div
             class="outline"
-            id="md-query-stop-btn"
-            @click=${this.queryStop.bind(this)}
+            id="md-query-clear-btn"
+            @click=${this.execute.bind(this)}
             type="submit">
             ${this.text}
           </div>
@@ -68,5 +66,5 @@ export class QueryStop extends LitElement {
     `;
   }
 }
-consume({ context: pyodideContext })(QueryStop.prototype, 'pyodide');
-customElements.define('md-query-stop', QueryStop);
+consume({ context: pyodideContext })(QueryClear.prototype, 'pyodide');
+customElements.define('md-query-clear', QueryClear);

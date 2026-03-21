@@ -10,14 +10,10 @@ class OllamaApi {
   }
 
   getEndpointByOperation(operation) {
-    switch (operation) {
-      case "generate":
-      case "tags":
-      case "pull":
-      case "delete":
-        return `${this.endpoint}${operation}`
-      default:
-        return `${this.endpoint}`
+    if (operation) {
+      return `${this.endpoint}${operation}`
+    } else {
+      return `${this.endpoint}`
     }
   }
 

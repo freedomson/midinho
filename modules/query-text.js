@@ -1,6 +1,7 @@
 import { LitElement, html, css } from './node_modules/lit-element/lit-element.js'
 import './query-start.js';
 import './query-stop.js';
+import './query-clear.js';
 import './query-speak-selector.js';
 import { pyodideContext } from './context.js';
 import { consume } from './node_modules/@lit-labs/context/index.js';
@@ -19,7 +20,8 @@ export class QueryText extends LitElement {
   static properties = {
     disabled: {type: Boolean},
     submitQuery: { type: Function},
-    cancelCallBack: { type: Function}
+    cancelCallBack: { type: Function},
+    clearCallBack: { type: Function}
   };
 
   constructor() {
@@ -38,8 +40,16 @@ export class QueryText extends LitElement {
     this.textarea = this.renderRoot.getElementById('md-query-text');
     this.start = this.shadowRoot.querySelector('md-query-start');
     this.stop = this.shadowRoot.querySelector('md-query-stop');
+    this.clear = this.shadowRoot.querySelector('md-query-clear');
   }
 
+  enableClear(){
+    this.clear.setDisable(false)
+  }
+
+  disableClear(){
+    this.clear.setDisable(true)
+  }
   updateContent(content){
     this.textarea.value = content
   }
@@ -141,6 +151,9 @@ export class QueryText extends LitElement {
           <md-query-stop
             .cancelCallBack=${this.cancelCallBack.bind(this)}
             .pyodide=${this.pyodide}></md-query-stop>
+          <md-query-clear
+            .clearCallBack=${this.clearCallBack.bind(this)}
+            .pyodide=${this.pyodide}></md-query-clear>
           <md-speak-selector></md-speak-selector>
         </fieldset>
         <div class="aiwarn">AI-generated content may be incorrect</div>

@@ -58,39 +58,27 @@ def getPromptByLanguage(lang_code):
 # ------------------------
 async def run(lang, user_query, model, callback, donecallback, cancelcallback, errorcallback):
 
+    global chat_history
+
     try:
-        # Prepare only the last user prompt
+        print(f"Running Chat")
         user_prompt = getPromptByLanguage(lang)
         formatted_query = user_prompt.format(query=user_query)
-
-        # Keep history with only the last user message
         chat_history.append(HumanMessage(content=formatted_query))
-
-        # Create the chain
         chain = create_chain(model, callback, donecallback)
-
-        # Call the chain
         response = await chain.ainvoke(chat_history)
-
-        # Keep history with only the last user message
-        chat_history = [
-            HumanMessage(content=formatted_query),
-            AIMessage(content=response.content)
-          ]
+        chat_history.append(AIMessage(content=response.content))
 
     except asyncio.CancelledError:
-        try:
-            callback("\n[Cancelled]\n")
-        except:
-            pass
-        cancelcallback("Task was cancelled.")
+        js_print(f"User CancelledError")
 
     except Exception as e:
-        print(f">Error: {e}")
+        print(f"Error -> errorcallback: {e}")
         errorcallback(e)
 
     finally:
         try:
+            print(f"Done -> donecallback")
             donecallback()
         except:
             pass

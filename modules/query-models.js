@@ -78,6 +78,38 @@ export class QueryModels extends LitElement {
     `
   }
 
+  async unloadLoadModel(model){
+      const response = await fetch(OllamaApi.getEndpointByOperation("generate"), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: model,
+          prompt: '',
+          keep_alive: 0
+        })
+      });
+  }
+
+  async unloadLoadModels() {
+    const response = await fetch(OllamaApi.getEndpointByOperation("ps"), {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    const data = await response.json();
+
+    if (!data.models || data.models.length === 0) {
+      console.log("No models loaded");
+      return;
+    }
+
+    // Extract names and unload each
+    for (const model of data.models) {
+      console.log("Unloading:", model.name);
+      await this.unloadLoadModel(model.name);
+    }
+  }
+
   async preloadModel() {
 
     const model = this.getSelectedModel()
@@ -89,6 +121,8 @@ export class QueryModels extends LitElement {
 
     store.setLoading(`Model ${model} preload started.`)
     console.log(`Model ${model} preload started.`);
+
+    this.unloadLoadModels()
 
     try {
       const response = await fetch(OllamaApi.getEndpointByOperation("generate"), {
@@ -104,15 +138,10 @@ export class QueryModels extends LitElement {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const reader = response.body.getReader();
-      // const decoder = new TextDecoder();
 
-      // let result = '';
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        // const chunk = decoder.decode(value);
-        // result += chunk;
-        // console.log(result)
       }
 
       console.log(`Model ${model} preloaded successfully.`);

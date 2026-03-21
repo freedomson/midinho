@@ -43,7 +43,6 @@ export class Query extends LitElement {
     super();
     this.messageWelcome = 'What can I help with?';
     this.msgs = [];
-    this.msgsRefs = []
     this.loading = false
     this.query = ""
   }
@@ -61,6 +60,8 @@ export class Query extends LitElement {
   }
 
   async submitQuery(query) {
+
+      this.mdQueryText.disableClear(true)
 
       this.setLoading(true)
       this.query = query
@@ -100,17 +101,21 @@ export class Query extends LitElement {
           msgEl.end.bind(msgEl)((()=>{
             this.setLoading(false)
             this.mdQueryText.enable()
+            this.mdQueryText.enableClear()
           }).bind(this))
         });
 
         this.pyodide.globals.set(
           "cancelcallback",
-          () => {});
+          () => {
+            this.mdQueryText.enableClear()
+          });
 
         this.pyodide.globals.set(
           "errorcallback",
           (e) => {
             this.errorCallBack.bind(this)(e)
+            this.mdQueryText.enableClear()
           });
 
       this.pyodide.runPythonAsync(`
@@ -121,6 +126,11 @@ export class Query extends LitElement {
             print("Caught a generic exception:", e)
       `)
 
+  }
+
+  async clearCallBack(){
+    this.msgs = []
+    await this.requestUpdate();
   }
 
   cancelCallBack(e){
@@ -164,6 +174,7 @@ export class Query extends LitElement {
           `)}
         </div>
         <md-query-text
+          .clearCallBack=${this.clearCallBack.bind(this)}
           .cancelCallBack=${this.cancelCallBack.bind(this)}
           .isLoading=${this.isLoading.bind(this)}
           .submitQuery=${this.submitQuery.bind(this)}>
