@@ -24,6 +24,7 @@ class MyStreamingHandler(BaseCallbackHandler):
 # ------------------------
 timeout = 1000
 keepalive = -1
+chat_history = []
 
 def create_chain(model, callback, donecallback):
     my_handler = MyStreamingHandler()
@@ -63,16 +64,19 @@ async def run(lang, user_query, model, callback, donecallback, cancelcallback, e
         formatted_query = user_prompt.format(query=user_query)
 
         # Keep history with only the last user message
-        chat_history = [HumanMessage(content=formatted_query)]
+        chat_history.append(HumanMessage(content=formatted_query))
 
         # Create the chain
         chain = create_chain(model, callback, donecallback)
 
         # Call the chain
-        response = await chain.ainvoke(chat_history, config={"timeout": timeout})
+        response = await chain.ainvoke(chat_history)
 
-        # Replace history with only the last AI response
-        chat_history = [AIMessage(content=response.content)]
+        # Keep history with only the last user message
+        chat_history = [
+            HumanMessage(content=formatted_query),
+            AIMessage(content=response.content)
+          ]
 
     except asyncio.CancelledError:
         try:

@@ -96,10 +96,10 @@ export class QueryModelsDownload extends LitElement {
         "input": ["text"]
       },
       {
-        "name": "qwen3.5:9b",
-        "size":  6.6 * 1024 * 1024 * 1024,
-        "context": "256K",
-        "input": ["text,image"]
+        "name": "mistral:7b",
+        "size":  4.4 * 1024 * 1024 * 1024,
+        "context": "40K",
+        "input": ["text"]
       }
     ];
   }
@@ -258,12 +258,12 @@ export class QueryModelsDownload extends LitElement {
           <header>
             <div class="grid">
               <div>
-                <h1>Download models</h1>
+                <h1>Download Model</h1>
               </div>
               <div align="right">
                 ${
                   !this.ollamamodels.length ?
-                    html `<mark>No module installed yet!</mark>`
+                    html `<mark>Choose a Model to Download.</mark>`
                     :
                     this.busy ?
                       ""

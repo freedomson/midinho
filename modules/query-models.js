@@ -16,8 +16,7 @@ export class QueryModels extends LitElement {
   `];
 
   static properties = {
-    ollamamodels: {type: Object},
-    preloadModelStatus: {type: Array}
+    ollamamodels: {type: Object}
   };
 
   hasModel() {
@@ -29,7 +28,6 @@ export class QueryModels extends LitElement {
     this.textSelectModel = 'Please select LLM';
     this.text = "Models"
     this.showDownloadModel = false
-    this.preloadModelStatus = []
   }
 
   toggleDownloadModel(){
@@ -54,9 +52,10 @@ export class QueryModels extends LitElement {
     this.ollamamodels = e.detail.value;
     this.requestUpdate();
     // Updated via downloads
-    setTimeout(() => {
+    setTimeout((() => {
       store.setModel(this.getSelectedModel());
-    }, 0);
+      this.preloadModel()
+    }).bind(this), 0);
   }
 
   getSelectedModel(){
@@ -80,15 +79,16 @@ export class QueryModels extends LitElement {
   }
 
   async preloadModel() {
+
     const model = this.getSelectedModel()
-    const found = this.preloadModelStatus.includes(model);
-    if (found) {
-      console.log(`Model ${model} was already preloaded.`)
-      return;
-    } else {
-      console.log(`Model ${model} will be preloaded.`)
-      this.preloadModelStatus.push(model)
+
+    if (model=="no_model") {
+      console.log(`Model ${model} nop.`);
+      return
     }
+
+    store.setLoading(`Model ${model} preload started.`)
+    console.log(`Model ${model} preload started.`);
 
     try {
       const response = await fetch(OllamaApi.getEndpointByOperation("generate"), {
@@ -120,6 +120,7 @@ export class QueryModels extends LitElement {
     } catch (err) {
       console.error('Error:', err);
     }
+    store.setLoading(false)
   }
 
   onChange() {
