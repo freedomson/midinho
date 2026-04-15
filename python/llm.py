@@ -1,8 +1,18 @@
 import asyncio
 import httpx
+import os
+import uuid
+import weakref
+from typing import Any
 from langchain_ollama import ChatOllama
 from langchain.prompts import PromptTemplate
 from langchain_core.messages import HumanMessage, AIMessage
+
+# Debug toggle (set LLM_DEBUG=0 to disable)
+LLM_DEBUG = os.getenv("LLM_DEBUG", "1") not in ("0", "false", "False")
+
+# track objects we've attempted to close to make abort idempotent
+_closed_objs = weakref.WeakSet()
 
 chat_history = []
 keepalive = -1  # note: keeps model loaded; doesn't mean a request is still running
@@ -37,6 +47,20 @@ async def _close_any(obj):
     """Close helper: supports async close(), async aclose(), and generator aclose()."""
     if obj is None:
         return
+    if obj in _closed_objs:
+        if LLM_DEBUG:
+            print(f"[llm] _close_any: already closed {obj!r}")
+        return
+
+    if LLM_DEBUG:
+        print(f"[llm] _close_any: attempting to close {obj!r} (type={type(obj)})")
+
+    # mark early to avoid races attempting to close the same underlying resource
+    try:
+        _closed_objs.add(obj)
+    except Exception:
+        # some builtin objects may not be weakref-able; ignore
+        pass
 
     # async generator / async iterator often has aclose()
     aclose = getattr(obj, "aclose", None)
@@ -45,18 +69,29 @@ async def _close_any(obj):
             r = aclose()
             if asyncio.iscoroutine(r):
                 await r
-        except Exception:
-            pass
+            if LLM_DEBUG:
+                print(f"[llm] _close_any: aclose succeeded for {obj!r}")
+            return
+        except Exception as e:
+            if LLM_DEBUG:
+                print(f"[llm] _close_any: aclose failed for {obj!r}: {e}")
 
-    # ollama.AsyncClient uses close() (awaitable)
+    # try close() (may be awaitable)
     close = getattr(obj, "close", None)
     if callable(close):
         try:
             r = close()
             if asyncio.iscoroutine(r):
                 await r
-        except Exception:
-            pass
+            if LLM_DEBUG:
+                print(f"[llm] _close_any: close succeeded for {obj!r}")
+            return
+        except Exception as e:
+            if LLM_DEBUG:
+                print(f"[llm] _close_any: close failed for {obj!r}: {e}")
+
+    if LLM_DEBUG:
+        print(f"[llm] _close_any: no close method found for {obj!r}")
 
 
 async def abort_request(state):
@@ -64,14 +99,36 @@ async def abort_request(state):
     Ollama cancellation: close the connection that opened the request.
     Practically: close the ACTIVE stream first, then close underlying clients.
     """
+    call_id = uuid.uuid4().hex
+    if LLM_DEBUG:
+        print(f"[llm] abort_request: start id={call_id}")
+
     # 1) close the live stream generator/iterator FIRST
     await _close_any(state.get("stream"))
 
     # 2) close llm internals / clients best-effort
     llm = state.get("llm")
     if llm is not None:
+        # try common attr names that may hold an ollama client wrapper
         for attr in ("_async_client", "async_client", "_client", "client"):
-            await _close_any(getattr(llm, attr, None))
+            ollama_client = getattr(llm, attr, None)
+            if ollama_client is None:
+                continue
+            if LLM_DEBUG:
+                print(f"[llm] abort_request[{call_id}]: found ollama wrapper via attr={attr}: {ollama_client!r}")
+
+            # The underlying httpx client is usually stored at ollama_client._client
+            httpx_client = getattr(ollama_client, "_client", None)
+            if httpx_client is not None:
+                if LLM_DEBUG:
+                    print(f"[llm] abort_request[{call_id}]: closing underlying httpx client: {httpx_client!r}")
+                await _close_any(httpx_client)
+
+            # also attempt to close the wrapper (some wrappers implement awaitable close())
+            await _close_any(ollama_client)
+
+    if LLM_DEBUG:
+        print(f"[llm] abort_request: done id={call_id}")
 
 
 class RunningChat:
@@ -79,11 +136,32 @@ class RunningChat:
         self.task = task
         self._state = state
 
-    def cancel(self):
-        # cancel coroutine
+    async def cancel(self):
+        # snapshot refs before task.cancel() triggers finally{} which clears them
+        snapshot = {"stream": self._state.get("stream"), "llm": self._state.get("llm")}
+        if LLM_DEBUG:
+            print(f"[llm] RunningChat.cancel: cancelling task={self.task} snapshot={{'stream': snapshot.get('stream'), 'llm': snapshot.get('llm')}}")
+
+        # signal cancellation to the running task
         self.task.cancel()
-        # abort network stream (fire-and-forget)
-        asyncio.create_task(abort_request(self._state))
+
+        # actively close network stream and underlying clients using the snapshot
+        try:
+            await abort_request(snapshot)
+        except Exception as e:
+            if LLM_DEBUG:
+                print(f"[llm] RunningChat.cancel: abort_request raised: {e}")
+
+        # wait for the task to finish to avoid races/double-cleanup
+        try:
+            await self.task
+        except asyncio.CancelledError:
+            # expected when task responds to cancellation
+            if LLM_DEBUG:
+                print(f"[llm] RunningChat.cancel: task {self.task} finished with CancelledError")
+        except Exception as e:
+            if LLM_DEBUG:
+                print(f"[llm] RunningChat.cancel: task {self.task} finished with exception: {e}")
 
 
 async def run(lang, user_query, model, token_callback, donecallback, cancelcallback, errorcallback, state):

@@ -1,11 +1,17 @@
 class Store {
   constructor() {
     this.loading = false;
+    this.stopped = false;
     this.model = false;
     this.speak = false;
     this.lang = "";
     this.speakerWorker = false
     this._subscribers = new Set();
+  }
+
+  setStopped(value) {
+    this.stopped = value;
+    this._notify();
   }
 
   setLang(value) {

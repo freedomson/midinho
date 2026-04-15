@@ -6,6 +6,7 @@ import './query-speak-selector.js';
 import { pyodideContext } from './context.js';
 import { consume } from './node_modules/@lit-labs/context/index.js';
 import { picocss } from './style.js';
+
 export class QueryText extends LitElement {
 
   static styles = [picocss, css`
@@ -15,13 +16,22 @@ export class QueryText extends LitElement {
       .aiwarn {
         text-align: center
       }
+      .meminfo {
+        text-align: center;
+        font-size: 0.9rem;
+        opacity: 0.9;
+      }
     `];
 
   static properties = {
     disabled: {type: Boolean},
     submitQuery: { type: Function},
     cancelCallBack: { type: Function},
-    clearCallBack: { type: Function}
+    clearCallBack: { type: Function},
+
+    // NEW: reactive state for memory display
+    freeMemoryMb: { type: Number },
+    memoryError: { type: String }
   };
 
   constructor() {
@@ -29,6 +39,70 @@ export class QueryText extends LitElement {
     this.disabled = false
     this.errorMsg = false
     this.placeholder = 'Ask anything';
+
+    // NEW
+    this.freeMemoryMb = null;
+    this.memoryError = '';
+    this._memTimer = null;
+  }
+
+  // NEW: start polling when element is connected
+  connectedCallback() {
+    super.connectedCallback();
+    this._startMemoryPolling();
+  }
+
+  // NEW: stop polling when element is disconnected
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._stopMemoryPolling();
+  }
+
+  _startMemoryPolling() {
+    // initial fetch immediately
+    this._fetchFreeMemory();
+
+    // refresh every 30 seconds
+    if (!this._memTimer) {
+      this._memTimer = setInterval(() => this._fetchFreeMemory(), 1000);
+    }
+  }
+
+  _stopMemoryPolling() {
+    if (this._memTimer) {
+      clearInterval(this._memTimer);
+      this._memTimer = null;
+    }
+  }
+
+  async _fetchFreeMemory() {
+    try {
+      const res = await fetch('http://localhost:8080/free-memory', {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (!res.ok) {
+        this.memoryError = `memory endpoint error (${res.status})`;
+        this.freeMemoryMb = null;
+        return;
+      }
+
+      const data = await res.json();
+      // Expecting { free_mb: <number> }
+      const mb = Number(data.free_mb);
+
+      if (Number.isFinite(mb)) {
+        this.freeMemoryMb = mb;
+        this.memoryError = '';
+      } else {
+        this.memoryError = 'invalid memory payload';
+        this.freeMemoryMb = null;
+      }
+    } catch (e) {
+      this.memoryError = 'memory fetch failed';
+      this.freeMemoryMb = null;
+    }
   }
 
   firstUpdated() {
@@ -134,6 +208,17 @@ export class QueryText extends LitElement {
     }
   }
 
+  // NEW: small renderer for memory line
+  renderMemory() {
+    if (this.memoryError) {
+      return html`<div class="meminfo">Free memory: <em>${this.memoryError}</em></div>`;
+    }
+    if (this.freeMemoryMb === null) {
+      return html`<div class="meminfo">Free memory: <em>loading…</em></div>`;
+    }
+    return html`<div class="meminfo">Free memory: <strong>${this.freeMemoryMb}</strong> MB</div>`;
+  }
+
   render() {
     return html`
         ${ this.renderText() }
@@ -148,11 +233,17 @@ export class QueryText extends LitElement {
             .pyodide=${this.pyodide}></md-query-clear>
           <md-speak-selector></md-speak-selector>
         </fieldset>
+
         <div class="aiwarn">AI-generated content may be incorrect</div>
+
+        <!-- NEW: memory div after aiwarn -->
+        ${this.renderMemory()}
+
         <br/>
         <br/>
     `;
   }
 }
+
 consume({ context: pyodideContext })(QueryText.prototype, 'pyodide');
 customElements.define('md-query-text', QueryText);

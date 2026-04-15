@@ -2,6 +2,7 @@ import { LitElement, html, css } from './node_modules/lit-element/lit-element.js
 import { pyodideContext } from './context.js';
 import { consume } from './node_modules/@lit-labs/context/index.js';
 import { picocss } from './style.js';
+import { store } from './store.js';
 export class QueryStop extends LitElement {
 
   static styles = [picocss, css`
@@ -24,16 +25,22 @@ export class QueryStop extends LitElement {
     this.text = 'Stop'
   }
 
-  queryStop(){
+  async queryStop(){
     this.cancelCallBack()
-    this.pyodide.runPythonAsync(`
-      try:
-        llm.task.cancel()
-        callback(" CANCELLED")
-        cancelcallback("Task was cancelled.")
-      except Exception as e:
-          print("Caught a generic exception:", e)
-    `)
+    try{
+
+      await this.pyodide.runPythonAsync(`
+        try:
+          await llm.task.cancel()
+          callback(" CANCELLED")
+          cancelcallback("Task was cancelled.")
+        except Exception as e:
+            print("Caught a generic exception:", e)
+      `)
+      store.setStopped(true)
+    }catch(e){
+      console.error('Error awaiting python cancel:', e)
+    }
     this.setDisable(true)
   }
 

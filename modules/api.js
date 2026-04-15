@@ -30,6 +30,22 @@ class OllamaApi {
       throw new Error('ollama-connection-error-api');
     }
   }
+
+  async loadModelFromSystem(modelName) {
+    const response = await fetch("http://localhost:8080/load-model", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: modelName })
+    });
+
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      throw new Error(detail || "python-load-model-error");
+    }
+
+    return await response.json();
+  }
+
 }
 
 // Export a single instance of the class

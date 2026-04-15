@@ -110,7 +110,42 @@ export class QueryModels extends LitElement {
     }
   }
 
-  async preloadModel() {
+  async waitForModelLoad(model, timeoutSeconds = 30, intervalMs = 1000) {
+    const startTime = Date.now();
+
+    while (true) {
+      try {
+        const response = await fetch(OllamaApi.getEndpointByOperation("ps"), {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await response.json();
+
+        // Check if model is present
+        if (data.models && data.models.some(m => m.name === model)) {
+          console.log(`Model "${model}" is now loaded.`);
+          return true;
+        }
+
+        // Check timeout
+        const elapsed = (Date.now() - startTime) / 1000;
+        if (elapsed >= timeoutSeconds) {
+          console.warn(`Timeout waiting for model "${model}".`);
+          return false;
+        }
+
+        // Wait before next poll
+        await new Promise(resolve => setTimeout(resolve, intervalMs));
+
+      } catch (error) {
+        console.error("Error while checking model status:", error);
+        return false;
+      }
+    }
+  }
+
+  async preloadModel(msg) {
 
     const model = this.getSelectedModel()
 
@@ -119,28 +154,43 @@ export class QueryModels extends LitElement {
       return
     }
 
-    store.setLoading(`Model ${model} preload started.`)
+    store.setLoading(msg ? msg : `Model ${model} preload started.`)
     console.log(`Model ${model} preload started.`);
 
-    this.unloadLoadModels()
+    await this.unloadLoadModels()
 
     try {
-      const response = await fetch(OllamaApi.getEndpointByOperation("generate"), {
+      await OllamaApi.loadModelFromSystem(model)
+      let response = await fetch(OllamaApi.getEndpointByOperation("chat"), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: model,
-          prompt: '',
           keep_alive: -1
         })
       });
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      const reader = response.body.getReader();
-
+      let reader = response.body.getReader();
       while (true) {
-        const { done, value } = await reader.read();
+        let { done, value } = await reader.read();
+        if (done) break;
+      }
+
+      response = await fetch(OllamaApi.getEndpointByOperation("generate"), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: model,
+          keep_alive: -1,
+          prompt: ''
+        })
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      reader = response.body.getReader();
+      while (true) {
+        let { done, value } = await reader.read();
         if (done) break;
       }
 
@@ -149,7 +199,15 @@ export class QueryModels extends LitElement {
     } catch (err) {
       console.error('Error:', err);
     }
-    store.setLoading(false)
+
+    const isLoaded = await this.waitForModelLoad(model);
+    if (isLoaded) {
+      store.setLoading(false)
+    } else {
+      store.setLoading(false)
+      console.log("Model failed to load in time");
+    }
+
   }
 
   onChange() {
@@ -160,6 +218,14 @@ export class QueryModels extends LitElement {
   firstUpdated() {
     this.preloadModel()
     store.setModel(this.getSelectedModel());
+  }
+
+  updated() {
+    if (store.stopped) {
+      console.log("Will hard stop model", store.stopped)
+      this.preloadModel("Stopping response stream")
+      store.setStopped(false)
+    }
   }
 
   renderModelList() {

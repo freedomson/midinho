@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@lit-component/message-box": "^1.0.4"
+  }
+}
