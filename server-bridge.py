@@ -8,7 +8,7 @@ import re
 import time
 
 HOST = "127.0.0.1"
-PORT = 8080
+PORT = 8081
 
 MODEL_RE = re.compile(r'^[a-zA-Z0-9._:/-]+$')
 

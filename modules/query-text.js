@@ -77,7 +77,7 @@ export class QueryText extends LitElement {
 
   async _fetchFreeMemory() {
     try {
-      const res = await fetch('http://localhost:8080/free-memory', {
+      const res = await fetch('http://localhost:8081/free-memory', {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
       });

@@ -32,7 +32,7 @@ class OllamaApi {
   }
 
   async loadModelFromSystem(modelName) {
-    const response = await fetch("http://localhost:8080/load-model", {
+    const response = await fetch("http://localhost:8081/load-model", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ model: modelName })
