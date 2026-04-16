@@ -8,7 +8,7 @@ import './header.js';
 import './nav.js';
 import './error.js';
 import './loading.js';
-import { pyodideContext, ollamamodelsContext } from './context.js';
+import { ollamamodelsContext } from './context.js';
 import { provide } from './node_modules/@lit-labs/context/index.js';
 import { picocss } from './style.js';
 import { store } from './store.js';
@@ -32,52 +32,9 @@ class App extends LitElement {
     this.ollamamodels = OllamaApi.modelNames;
   }
 
-  async setupPyodide() {
-    this.pyodide = await loadPyodide({
-      indexURL : './pyodide/',
-      stdLibURL: './pyodide/python_stdlib.zip'
-    });
-    await this.pyodide.loadPackage("micropip");
-    const micropip = this.pyodide.pyimport("micropip");
-
-    await micropip.install("anyio")
-    await micropip.install("requests")
-    await micropip.install("pydantic")
-    await micropip.install("zstandard")
-
-    await this.pyodide.loadPackage('./wasm/jsonpatch-1.33-py2.py3-none-any.whl');
-    await this.pyodide.loadPackage('./wasm/jsonpointer-3.0.0-py2.py3-none-any.whl');
-    await this.pyodide.loadPackage('./wasm/pyyaml-6.0.2-cp313-cp313-pyodide_2025_0_wasm32.whl');
-    await this.pyodide.loadPackage('./wasm/sqlalchemy-2.0.39-cp313-cp313-pyodide_2025_0_wasm32.whl');
-    await this.pyodide.loadPackage('./wasm/sqlite3-1.0.0-cp313-cp313-pyodide_2025_0_wasm32.whl');
-    await this.pyodide.loadPackage('./wasm/ollama-0.5.1-py3-none-any.whl');
-    await this.pyodide.loadPackage('./wasm/langsmith-0.3.44-py3-none-any.whl');
-    await this.pyodide.loadPackage('./wasm/langchain_text_splitters-0.3.8-py3-none-any.whl');
-    await this.pyodide.loadPackage('./wasm/langchain_core-0.3.63-py3-none-any.whl');
-    await this.pyodide.loadPackage('./wasm/requests_toolbelt-1.0.0-py2.py3-none-any.whl');
-    await this.pyodide.loadPackage('./wasm/tenacity-9.1.2-py3-none-any.whl');
-    await this.pyodide.loadPackage('./wasm/langchain_ollama-0.3.3-py3-none-any.whl');
-    await this.pyodide.loadPackage('./wasm/langchain-0.3.25-py3-none-any.whl');
-
-    await this.pyodide.loadPackage('./static/httpx-0.28.1-py3-none-any.whl');
-
-    // console.log(micropip.freeze())
-    await this.pyodide.runPythonAsync(`
-      from pyodide.http import pyfetch
-      response = await pyfetch("python/llm.py")
-      with open("llm.py", "wb") as f:
-          f.write(await response.bytes())
-
-      # Preload classes
-      import llm
-    `)
-
-  }
-
-  _loadPythonSourceCodeTask = new Task(this, {
+  _loadSourceCodeTask = new Task(this, {
     task: async ([], {signal}) => {
       await this.getOllamaModels();
-      await this.setupPyodide();
     },
     args: () => []
   });
@@ -123,7 +80,7 @@ class App extends LitElement {
       <link rel="stylesheet" href="./css/pico.sand.min.css">
       <div class="md-app-container-wrapper">
       ${
-        this._loadPythonSourceCodeTask.render({
+        this._loadSourceCodeTask.render({
           initial: () => html`<br /><p>Waiting to start task</p>`,
           pending: () => html`
             <br />
@@ -147,6 +104,6 @@ class App extends LitElement {
     `;
   }
 }
-provide({ context: pyodideContext })(App.prototype, 'pyodide');
+
 provide({ context: ollamamodelsContext })(App.prototype, 'ollamamodels');
 customElements.define('md-app', App);

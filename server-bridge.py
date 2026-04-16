@@ -12,6 +12,7 @@ PORT = 8081
 
 MODEL_RE = re.compile(r'^[a-zA-Z0-9._:/-]+$')
 
+
 def run_ollama(model):
     cmd = ["ollama", "run", model]
 
@@ -22,16 +23,14 @@ def run_ollama(model):
         stderr=subprocess.PIPE
     )
 
-    # NOTE: ollama run is interactive; this sends one prompt and waits for completion
-    out, err = p.communicate("ping\n")
+    # Close stdin immediately so ollama run boots the model and exits
+    out, err = p.communicate("")
     return p.returncode, out, err
-
-
 
 def get_free_memory_mb():
     """
-    Returns available system memory in MB using `free -b`
-    Works with outputs that include decimals and 'B' units.
+    Returns available system memory in MB using `free -b`.
+    Compatible with Alpine (BusyBox) and GNU free.
     """
     try:
         p = subprocess.Popen(
@@ -46,13 +45,16 @@ def get_free_memory_mb():
         for line in out.splitlines():
             line = line.strip()
             if line.lower().startswith("mem:"):
-                # Extract all byte values ending with 'B'
-                # Example token: 321208320.00 B
-                matches = re.findall(r'([\d.]+)\s*B', line)
-                if not matches:
+                # Extract ALL numeric values (with or without decimals)
+                # Works for:
+                # - Alpine: 34359738368
+                # - GNU:    34359738368
+                # - Decorated: 34359738368.00 B
+                numbers = re.findall(r'[\d.]+', line)
+                if len(numbers) < 2:
                     return 0
 
-                available_bytes = int(float(matches[-1]))  # last column = available
+                available_bytes = int(float(numbers[-1]))  # last column
                 return available_bytes / (1024 * 1024)
 
         return 0

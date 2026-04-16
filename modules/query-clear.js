@@ -1,5 +1,4 @@
 import { LitElement, html, css } from './node_modules/lit-element/lit-element.js'
-import { pyodideContext } from './context.js';
 import { consume } from './node_modules/@lit-labs/context/index.js';
 import { picocss } from './style.js';
 export class QueryClear extends LitElement {
@@ -14,7 +13,8 @@ export class QueryClear extends LitElement {
   `];
 
   static properties = {
-    disabled: {type: Boolean}
+    disabled: {type: Boolean},
+    clearCallBack: { type: Function},
   };
 
   constructor() {
@@ -24,14 +24,6 @@ export class QueryClear extends LitElement {
   }
 
   execute(){
-    this.pyodide.runPythonAsync(`
-      try:
-        print(dir(llm))
-        llm.chat_history = []
-      except Exception as e:
-          print(dir(llm))
-          print("Caught a generic exception:", e)
-    `)
     this.clearCallBack()
     this.setDisable(true)
   }
@@ -67,5 +59,5 @@ export class QueryClear extends LitElement {
     `;
   }
 }
-consume({ context: pyodideContext })(QueryClear.prototype, 'pyodide');
+
 customElements.define('md-query-clear', QueryClear);

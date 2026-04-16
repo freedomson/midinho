@@ -161,38 +161,38 @@ export class QueryModels extends LitElement {
 
     try {
       await OllamaApi.loadModelFromSystem(model)
-      let response = await fetch(OllamaApi.getEndpointByOperation("chat"), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: model,
-          keep_alive: -1
-        })
-      });
+      // let response = await fetch(OllamaApi.getEndpointByOperation("chat"), {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({
+      //     model: model,
+      //     keep_alive: -1
+      //   })
+      // });
 
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      let reader = response.body.getReader();
-      while (true) {
-        let { done, value } = await reader.read();
-        if (done) break;
-      }
+      // if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      // let reader = response.body.getReader();
+      // while (true) {
+      //   let { done, value } = await reader.read();
+      //   if (done) break;
+      // }
 
-      response = await fetch(OllamaApi.getEndpointByOperation("generate"), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: model,
-          keep_alive: -1,
-          prompt: ''
-        })
-      });
+      // response = await fetch(OllamaApi.getEndpointByOperation("generate"), {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({
+      //     model: model,
+      //     keep_alive: -1,
+      //     prompt: ''
+      //   })
+      // });
 
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      reader = response.body.getReader();
-      while (true) {
-        let { done, value } = await reader.read();
-        if (done) break;
-      }
+      // if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      // reader = response.body.getReader();
+      // while (true) {
+      //   let { done, value } = await reader.read();
+      //   if (done) break;
+      // }
 
       console.log(`Model ${model} preloaded successfully.`);
 
@@ -202,11 +202,10 @@ export class QueryModels extends LitElement {
 
     const isLoaded = await this.waitForModelLoad(model);
     if (isLoaded) {
-      store.setLoading(false)
     } else {
-      store.setLoading(false)
       console.log("Model failed to load in time");
     }
+    store.setLoading(false)
 
   }
 

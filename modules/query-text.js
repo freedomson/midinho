@@ -3,7 +3,6 @@ import './query-start.js';
 import './query-stop.js';
 import './query-clear.js';
 import './query-speak-selector.js';
-import { pyodideContext } from './context.js';
 import { consume } from './node_modules/@lit-labs/context/index.js';
 import { picocss } from './style.js';
 
@@ -226,11 +225,9 @@ export class QueryText extends LitElement {
           <md-query-start
             .processQuery=${this.processQuery.bind(this)}></md-query-start>
           <md-query-stop
-            .cancelCallBack=${this.cancelCallBack.bind(this)}
-            .pyodide=${this.pyodide}></md-query-stop>
+            .cancelCallBack=${this.cancelCallBack.bind(this)}></md-query-stop>
           <md-query-clear
-            .clearCallBack=${this.clearCallBack.bind(this)}
-            .pyodide=${this.pyodide}></md-query-clear>
+            .clearCallBack=${this.clearCallBack.bind(this)}></md-query-clear>
           <md-speak-selector></md-speak-selector>
         </fieldset>
 
@@ -245,5 +242,5 @@ export class QueryText extends LitElement {
   }
 }
 
-consume({ context: pyodideContext })(QueryText.prototype, 'pyodide');
+
 customElements.define('md-query-text', QueryText);

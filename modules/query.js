@@ -1,10 +1,11 @@
-import {LitElement, html, css} from './node_modules/lit-element/lit-element.js'
+import { LitElement, html, css } from './node_modules/lit-element/lit-element.js';
 import './search.js';
 import './query-text.js';
-import { pyodideContext } from './context.js';
 import { consume } from './node_modules/@lit-labs/context/index.js';
 import { picocss } from './style.js';
 import { store } from './store.js';
+import { OllamaChat } from './ollama-chat.js';
+
 export class Query extends LitElement {
 
   static styles = [picocss, css`
@@ -24,9 +25,9 @@ export class Query extends LitElement {
   `];
 
   static properties = {
-    textarea: {type: Object},
-    msgs: {type: Array},
-    loading:  {type: Boolean}
+    textarea: { type: Object },
+    msgs: { type: Array },
+    loading: { type: Boolean }
   };
 
   connectedCallback() {
@@ -43,139 +44,143 @@ export class Query extends LitElement {
     super();
     this.messageWelcome = 'What can I help with?';
     this.msgs = [];
-    this.loading = false
-    this.query = ""
+    this.msgsRefs = [];
+    this.loading = false;
+
+    // ✅ Browser-native Ollama client
+    this.ollama = new OllamaChat({
+      baseUrl: 'http://localhost:11434',
+      debug: true
+    });
   }
 
   firstUpdated() {
     this.mdQueryText = this.shadowRoot.querySelector('md-query-text');
   }
 
-  isLoading(){
+  isLoading() {
     return this.loading;
   }
 
   setLoading(value) {
-    this.loading = value
+    this.loading = value;
   }
 
   async submitQuery(query) {
+    this.setLoading(true);
 
-      this.mdQueryText.disableClear(true)
+    const selectedModel = store.model;
 
-      this.setLoading(true)
-      this.query = query
-      // Construct message
-      let selectedModel = store.model
-      let msg = {
-        id: this.msgs.length,
-        query: query,
-        model: selectedModel,
-        response: ""
-      }
+    const msg = {
+      id: this.msgs.length,
+      query,
+      model: selectedModel,
+      response: ""
+    };
 
-      this.msgs = [...this.msgs, msg];
-
-      // Set bridge vars
-      window.pythonQueryStr = msg.query;
-      window.pythonSelectedModel = selectedModel
-      window.Prism = Prism;
-      window.lang = store.lang;
-
-      // Update UI with message
-      await this.requestUpdate();
-
-      let msgEl = this.renderRoot.getElementById(`md-search-${this.msgs.length}`);
-
-      setTimeout(() => {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
-      }, 0);
-
-      this.pyodide.globals.set(
-        "callback",
-        (token) => msgEl.write.bind(msgEl)(token));
-
-      this.pyodide.globals.set(
-        "donecallback",
-        () => {
-          msgEl.end.bind(msgEl)((()=>{
-            this.setLoading(false)
-            this.mdQueryText.enable()
-          }).bind(this))
-        });
-
-        this.pyodide.globals.set(
-          "cancelcallback",
-          () => {
-            this.mdQueryText.enable()
-          });
-
-        this.pyodide.globals.set(
-          "errorcallback",
-          (e) => {
-            this.errorCallBack.bind(this)(e)
-            this.mdQueryText.enable()
-          });
-
-      this.pyodide.runPythonAsync(`
-        from js import pythonQueryStr, pythonSelectedModel, Prism, lang
-        try:
-          llm.task = llm.run_query(lang, pythonQueryStr, pythonSelectedModel, callback, donecallback, cancelcallback, errorcallback)
-        except Exception as e:
-            print("Caught a generic exception:", e)
-      `)
-
-  }
-
-  async clearCallBack(){
-    this.msgs = []
+    this.msgs = [...this.msgs, msg];
     await this.requestUpdate();
+
+    const msgEl = this.renderRoot.getElementById(
+      `md-search-${this.msgs.length}`
+    );
+
+    setTimeout(() => {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' });
+    }, 0);
+
+    this.mdQueryText.disable?.();
+
+    this.ollama.run({
+      lang: store.lang,
+      query,
+      model: selectedModel,
+
+      onToken: (token) => {
+        msgEl.write(token);
+      },
+
+      onDone: () => {
+        msgEl.end(() => {
+          this.setLoading(false);
+          this.mdQueryText.enable();
+        });
+      },
+
+      onCancel: () => {
+        msgEl.cancel(() => {
+          this.setLoading(false);
+          this.mdQueryText.enable();
+        });
+      },
+
+      onError: (e) => {
+        this.errorCallBack(e);
+      }
+    });
   }
 
-  cancelCallBack(e){
-    let msgEl = this.renderRoot.getElementById(`md-search-${this.msgs.length}`);
-    let error = e;
-    msgEl.cancel.bind(msgEl)((()=>{
-      this.setLoading(false)
-      this.mdQueryText.enable()
-    }).bind(this))
+
+  clearCallBack() {
+    this.ollama.abort();
+    this.ollama.clearHistory();
+
+    this.msgs = [];
+    this.loading = false;
+    this.mdQueryText?.enable();
+
+    this.requestUpdate();
+    console.log("clearCallBack")
   }
 
-  errorCallBack(e){
-    let errorText = `Engine error detected. Please try again or restart application. ${e}`
-    console.log(errorText)
-    let msgEl = this.renderRoot.getElementById(`md-search-${this.msgs.length}`)
-    msgEl.write.bind(msgEl)(errorText)
-    this.mdQueryText.updateContent(this.query)
-    setTimeout((()=> {
-      this.mdQueryText.enable()
-    }).bind(this),0)
-    this.cancelCallBack(e)
+  cancelCallBack(e) {
+    // ✅ Abort network request
+    this.ollama.abort();
+
+    const msgEl = this.renderRoot.getElementById(
+      `md-search-${this.msgs.length}`
+    );
+
+    msgEl.cancel(() => {
+      this.setLoading(false);
+      this.mdQueryText.enable();
+      if (e) {
+        this.mdQueryText.setErrorMsg(e);
+      }
+    });
+  }
+
+  errorCallBack(e) {
+    console.error('LLM error:', e);
+    this.setLoading(false);
+    this.cancelCallBack(e);
   }
 
   render() {
     return html`
-        <p class="md-query-welcome">
-          <b>${this.messageWelcome}</b>
-        </p>
-        <div id="query-response">
-          ${this.msgs.map((msg, index) => html`
-            <md-search
-              id="md-search-${index+1}"
-              .speak=${store.speak}
-              .worker=${store.speakerWorker}
-              .msg=${msg}
-              ></md-search>
-          `)}
-        </div>
-        <md-query-text
-          .clearCallBack=${this.clearCallBack.bind(this)}
-          .cancelCallBack=${this.cancelCallBack.bind(this)}
-          .isLoading=${this.isLoading.bind(this)}
-          .submitQuery=${this.submitQuery.bind(this)}>
-        </md-query-text>
+      <p class="md-query-welcome">
+        ${this.messageWelcome}
+      </p>
+
+      <div id="query-response">
+        ${this.msgs.map((msg, index) => html`
+          <md-search
+            id="md-search-${index + 1}"
+            .speak=${store.speak}
+            .worker=${store.speakerWorker}
+            .msg=${msg}>
+          </md-search>
+        `)}
+      </div>
+
+      <md-query-text
+        .clearCallBack=${this.clearCallBack.bind(this)}
+        .cancelCallBack=${this.cancelCallBack.bind(this)}
+        .isLoading=${this.isLoading.bind(this)}
+        .submitQuery=${this.submitQuery.bind(this)}>
+      </md-query-text>
     `;
   }
 }
-consume({ context: pyodideContext })(Query.prototype, 'pyodide');
+
 customElements.define('md-query', Query);
