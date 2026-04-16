@@ -3,29 +3,22 @@ import OllamaApi from './api.js';
 import { ollamamodelsContext } from './context.js';
 import { consume } from './node_modules/@lit-labs/context/index.js';
 import { picocss } from './style.js';
+
 export class QueryModelsDownload extends LitElement {
   static styles = [picocss, css`
-    dialog {
-      font-size: 1rem;
-    }
-    #md-query-models-download {
-      margin-bottom: 0px;
-      min-width: 3rem;
-    }
+    dialog { font-size: 1rem; }
+    #md-query-models-download { margin-bottom: 0px; min-width: 3rem; }
     #md-query-models-download-img{
       height: 25px;
       width: 25px;
       background-color: light-dark(transparent, #ffffff);
       padding: 5px;
     }
-    #md-query-models-download-status-progress{
-      text-align: right;
-    }
+    #md-query-models-download-status-progress{ text-align: right; }
+    .memline { font-size: 0.9rem; opacity: 0.85; margin: 0.25rem 0 0; }
+    .memerr { font-style: italic; }
   `];
-  // createRenderRoot() {
-  //   // This disables Shadow DOM; component styles are global
-  //   return this;
-  // }
+
   static properties = {
     ollamamodels:{type: Array},
     defaultModels: {type: Array},
@@ -34,7 +27,13 @@ export class QueryModelsDownload extends LitElement {
     downloadingProgressStatus: {type: String},
     downloadingProgressStatusProgress: {type: String},
     callback: {type: Object},
-    abortController: {type: Object}
+    abortController: {type: Object},
+
+    // ✅ NEW: memory state
+    freeMemoryMb: { type: Number },
+    memoryError: { type: String },
+    memoryEndpoint: { type: String },
+    memoryIntervalMs: { type: Number },
   };
 
   constructor() {
@@ -46,73 +45,83 @@ export class QueryModelsDownload extends LitElement {
     this.downloadingProgressValue = 0;
     this.downloadingProgressStatus = "";
     this.downloadingProgressStatusProgress = "";
+
+    // ✅ NEW: memory defaults
+    this.freeMemoryMb = null;       // <-- variable you asked for
+    this.memoryError = "";
+    this.memoryEndpoint = "http://localhost:8081/free-memory";
+    this.memoryIntervalMs = 1000;
+    this._memTimer = null;
+
     this.defaultModels = [
-      {
-        "name": "smollm2:135m",
-        "size": 0.271 * 1024 * 1024 * 1024,
-        "context": "8K",
-        "input": ["text"]
-      },
-      {
-        "name": "gemma3:4b",
-        "size": 3.3 * 1024 * 1024 * 1024,
-        "context": "128K",
-        "input": ["text","image"]
-      },
-      {
-        "name": "gemma3:12b",
-        "size": 8.1 * 1024 * 1024 * 1024,
-        "context": "128K",
-        "input": ["text","image"]
-      },
-      {
-        "name": "llama3.1:8b",
-        "size": 4.9 * 1024 * 1024 * 1024,
-        "context": "128K",
-        "input": ["text"]
-      },
-      {
-        "name": "llama3.2:3b",
-        "size": 2 * 1024 * 1024 * 1024,
-        "context": "128K",
-        "input": ["text"]
-      },
-      {
-        "name": "deepseek-r1:14b",
-        "size": 9.0 * 1024 * 1024 * 1024,
-        "context": "128K",
-        "input": ["text"]
-      },
-      {
-        "name": "deepseek-r1:1.5b",
-        "size": 1.1 * 1024 * 1024 * 1024,
-        "context": "128K",
-        "input": ["text"]
-      },
-      {
-        "name": "qwen3:8b",
-        "size":  5.2 * 1024 * 1024 * 1024,
-        "context": "40K",
-        "input": ["text"]
-      },
-      {
-        "name": "mistral:7b",
-        "size":  4.4 * 1024 * 1024 * 1024,
-        "context": "40K",
-        "input": ["text"]
-      }
+      { "name": "smollm2:135m", "size": 0.271 * 1024 * 1024 * 1024, "context": "8K", "input": ["text"] },
+      { "name": "gemma3:4b", "size": 3.3 * 1024 * 1024 * 1024, "context": "128K", "input": ["text","image"] },
+      { "name": "gemma3:12b", "size": 8.1 * 1024 * 1024 * 1024, "context": "128K", "input": ["text","image"] },
+      { "name": "llama3.1:8b", "size": 4.9 * 1024 * 1024 * 1024, "context": "128K", "input": ["text"] },
+      { "name": "llama3.2:3b", "size": 2 * 1024 * 1024 * 1024, "context": "128K", "input": ["text"] },
+      { "name": "deepseek-r1:14b", "size": 9.0 * 1024 * 1024 * 1024, "context": "128K", "input": ["text"] },
+      { "name": "deepseek-r1:1.5b", "size": 1.1 * 1024 * 1024 * 1024, "context": "128K", "input": ["text"] },
+      { "name": "qwen3:8b", "size":  5.2 * 1024 * 1024 * 1024, "context": "40K", "input": ["text"] },
+      { "name": "mistral:7b", "size":  4.4 * 1024 * 1024 * 1024, "context": "40K", "input": ["text"] },
+      { "name": "gemma4:e4b", "size":  9.6 * 1024 * 1024 * 1024, "context": "128K", "input": ["text","image"] }
     ];
   }
 
   connectedCallback() {
     super.connectedCallback();
+
     // Setup context consumer
     this._consumer = consume({ context: ollamamodelsContext })(QueryModelsDownload.prototype, 'ollamamodels');
+
+    // ✅ NEW: start memory polling
+    this._fetchFreeMemory();
+    // this._memTimer = setInterval(() => this._fetchFreeMemory(), this.memoryIntervalMs);
   }
 
   disconnectedCallback() {
     if (this._consumer) this._consumer.dispose();
+
+    // ✅ NEW: stop polling
+    if (this._memTimer) {
+      clearInterval(this._memTimer);
+      this._memTimer = null;
+    }
+
     super.disconnectedCallback();
+  }
+
+  // ✅ NEW: fetch + store free memory (MB) into this.freeMemoryMb
+  async _fetchFreeMemory() {
+    try {
+      const res = await fetch(this.memoryEndpoint, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (!res.ok) {
+        this.memoryError = `endpoint error (${res.status})`;
+        this.freeMemoryMb = null;
+        this.requestUpdate();
+        return;
+      }
+
+      const data = await res.json();
+      const mb = Number(data.free_mb);
+
+      if (Number.isFinite(mb)) {
+        this.freeMemoryMb = mb;
+        this.memoryError = "";
+      } else {
+        this.freeMemoryMb = null;
+        this.memoryError = "invalid payload";
+      }
+
+      this.requestUpdate();
+    } catch {
+      this.freeMemoryMb = null;
+      this.memoryError = "fetch failed";
+      this.requestUpdate();
+    }
   }
 
   updateModels() {
@@ -140,9 +149,7 @@ export class QueryModelsDownload extends LitElement {
     this.toggleBusy()
     const response = await fetch(OllamaApi.getEndpointByOperation('pull'), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: modelName }),
       signal: this.abortController.signal
     });
@@ -159,7 +166,7 @@ export class QueryModelsDownload extends LitElement {
           console.warn('Stream read aborted');
           return;
         }
-        throw err; // rethrow if it's a different error
+        throw err;
       }
 
       if (done) break;
@@ -181,10 +188,8 @@ export class QueryModelsDownload extends LitElement {
       } catch (error) {
         console.log("Models Download",error)
       }
-
     }
 
-    console.log('✅ Model download finished');
     this.ollamamodels = await OllamaApi.getOllamaModels()
     this.toggleBusy()
     this.requestUpdate();
@@ -204,14 +209,11 @@ export class QueryModelsDownload extends LitElement {
     this.toggleBusy()
     const response = await fetch(OllamaApi.getEndpointByOperation('delete'), {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: modelName }),
     });
 
     if (response.ok) {
-      console.log(`✅ Model "${modelName}" deleted successfully`);
       this.ollamamodels = await OllamaApi.getOllamaModels()
       this.toggleBusy()
     } else {
@@ -226,18 +228,12 @@ export class QueryModelsDownload extends LitElement {
     arr2.forEach(item2 => {
       const index = merged.findIndex(item1 => item1.id === item2.id);
       if (index >= 0) {
-        // Fill missing/empty values
         for (let key in item2) {
-          if (
-            merged[index][key] === undefined ||
-            merged[index][key] === null ||
-            merged[index][key] === ""
-          ) {
+          if (merged[index][key] === undefined || merged[index][key] === null || merged[index][key] === "") {
             merged[index][key] = item2[key];
           }
         }
       } else {
-        // Add new object if not in arr1
         merged.push(item2);
       }
     });
@@ -250,6 +246,17 @@ export class QueryModelsDownload extends LitElement {
     return u.sort((a, b) => a.name.localeCompare(b.name))
   }
 
+  // ✅ NEW: render helper to show memory line
+  renderFreeMemoryLine() {
+    if (this.memoryError) {
+      return html`<div class="memline">Free memory: <span class="memerr">${this.memoryError}</span></div>`;
+    }
+    if (this.freeMemoryMb === null) {
+      return html`<div class="memline">Free memory: <em>loading…</em></div>`;
+    }
+    return html`<div class="memline">Free memory: <strong>${this.freeMemoryMb}</strong> MB</div>`;
+  }
+
   render() {
     return html`
       <link rel="stylesheet" href="./css/pico.sand.min.css">
@@ -259,21 +266,20 @@ export class QueryModelsDownload extends LitElement {
             <div class="grid">
               <div>
                 <h1>Download Model</h1>
+                <!-- ✅ show free memory in header -->
+                ${this.renderFreeMemoryLine()}
               </div>
               <div align="right">
                 ${
                   !this.ollamamodels.length ?
-                    html `<mark>Choose a Model to Download.</mark>`
+                    html`<mark>Choose a Model to Download.</mark>`
                     :
-                    this.busy ?
-                      ""
-                      :
-                      html `<button class="outline contrast" @click=${this.finish.bind(this)}>Close</button>`
+                    this.busy ? "" : html`<button class="outline contrast" @click=${this.finish.bind(this)}>Close</button>`
                 }
               </div>
             </div>
-
           </header>
+
           ${this.busy ? html`
             <progress value="${this.downloadingProgressValue}" max="1"></progress>
             <div class="grid">
@@ -281,70 +287,69 @@ export class QueryModelsDownload extends LitElement {
               <span id="md-query-models-download-status-progress">${this.downloadingProgressStatusProgress}</span>
             </div>
             <br/>
-            <div
-              id="md-query-models-download"
-              @click=${this.cancelDownload.bind(this)}
-              type="submit"
-              >
+            <div id="md-query-models-download" @click=${this.cancelDownload.bind(this)} type="submit">
               Cancel
             </div>
           ` : ''}
+
           <table>
             <thead>
               <tr>
                 <th scope="col">Model</th>
+                <th scope="col">Memory</th>
                 <th scope="col">Size</th>
                 <th scope="col"></th>
               </tr>
             </thead>
             <tbody>
-              ${
-                this.getModels().map((model, index) => html`
+              ${  this.freeMemoryMb ?
+                this.getModels().map((model) => html`
                   <tr>
                     <th scope="row">
                       <a href="https://ollama.com/library/${model.name}">${model.name}</a>
                     </th>
+                    <td>
+                    ${
+                      this.freeMemoryMb > (model.size / 1024 / 1024) ?
+                      "Recommended" : "-"
+                    }
+                    </td>
                     <td>${this.roundTo2Decimals(model.size / 1024 / 1024 / 1024)} GB</td>
                     <td>
-                        ${
-                          !OllamaApi.models.some(current => current.name === model.name) ?
-                            html `<div
+                      ${
+                        !OllamaApi.models.some(current => current.name === model.name) ?
+                          html`<div
                             id="md-query-models-download"
                             class="outline contrast"
                             @click=${this.downloadModel.bind(this, model.name)}
                             type="submit"
                             ?disabled=${this.busy}
-                            >
-                              <img id="md-query-models-download-img" src="./css/download.png">
-                            </div>`
-                            :
-                            html `<div
+                          >
+                            <img id="md-query-models-download-img" src="./css/download.png">
+                          </div>`
+                          :
+                          html`<div
                             id="md-query-models-download"
                             class="outline contrast"
                             @click=${this.deleteModel.bind(this, model.name)}
                             type="submit"
                             ?disabled=${this.busy}
-                            >
-                              <img id="md-query-models-download-img" src="./css/delete.png">
-                            </div>`
-                        }
+                          >
+                            <img id="md-query-models-download-img" src="./css/delete.png">
+                          </div>`
+                      }
                     </td>
                   </tr>
-                `)
+                `) : ""
               }
             </tbody>
           </table>
-          <footer>
-            <div class="grid">
-              <div>
-                <mark>Check your phone available memory!</mark>
-              </div>
-            </div>
-          </footer>
+
         </article>
       </dialog>
     `;
   }
 }
+
 consume({ context: ollamamodelsContext })(QueryModelsDownload.prototype, 'ollamamodels');
 customElements.define('md-query-models-download', QueryModelsDownload);
