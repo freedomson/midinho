@@ -22,7 +22,7 @@ export class Header extends LitElement {
       },
       {
         value: "en_US",
-        name: "American"
+        name: "English"
       }
     ]
   }

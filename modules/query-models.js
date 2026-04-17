@@ -90,25 +90,26 @@ export class QueryModels extends LitElement {
       });
   }
 
-  async unloadLoadModels() {
-    const response = await fetch(OllamaApi.getEndpointByOperation("ps"), {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
-    });
+async unloadLoadModels() {
+    let loaded;
+    try {
+      loaded = await OllamaApi.getLoadedModels();
+    } catch (e) {
+      console.error("Error fetching loaded models:", e);
+      return;
+    }
 
-    const data = await response.json();
-
-    if (!data.models || data.models.length === 0) {
+    if (!loaded.length) {
       console.log("No models loaded");
       return;
     }
 
-    // Extract names and unload each
-    for (const model of data.models) {
-      console.log("Unloading:", model.name);
-      await this.unloadLoadModel(model.name);
+    for (const name of loaded) {
+      console.log("Unloading:", name);
+      await this.unloadLoadModel(name);
     }
   }
+
 
   async waitForModelLoad(model, timeoutSeconds = 30, intervalMs = 1000) {
     const startTime = Date.now();
@@ -145,36 +146,41 @@ export class QueryModels extends LitElement {
     }
   }
 
-  async preloadModel(msg) {
+async preloadModel(msg) {
+    const model = this.getSelectedModel();
 
-    const model = this.getSelectedModel()
-
-    if (model=="no_model") {
+    if (model === "no_model") {
       console.log(`Model ${model} nop.`);
-      return
+      return;
     }
 
-    store.setLoading(msg ? msg : `Model ${model} preload started.`)
+    store.setLoading(msg ? msg : `Model ${model} preload started.`);
     console.log(`Model ${model} preload started.`);
 
-    await this.unloadLoadModels()
-
     try {
-      await OllamaApi.loadModelFromSystem(model)
+      // ✅ NEW: short-circuit if already loaded
+      const alreadyLoaded = await OllamaApi.isModelLoaded(model);
+      if (alreadyLoaded) {
+        console.log(`Model "${model}" already loaded. Skipping load.`);
+        store.setLoading(false);
+        return;
+      }
 
+      // keep your existing behavior when not loaded:
+      await this.unloadLoadModels();
+
+      await OllamaApi.loadModelFromSystem(model);
       console.log(`Model ${model} preloaded successfully.`);
 
+      const isLoaded = await this.waitForModelLoad(model);
+      if (!isLoaded) {
+        console.log("Model failed to load in time");
+      }
     } catch (err) {
-      console.error('Error:', err);
+      console.error("Error:", err);
+    } finally {
+      store.setLoading(false);
     }
-
-    const isLoaded = await this.waitForModelLoad(model);
-    if (isLoaded) {
-    } else {
-      console.log("Model failed to load in time");
-    }
-    store.setLoading(false)
-
   }
 
   onChange() {
@@ -190,7 +196,6 @@ export class QueryModels extends LitElement {
   updated() {
     if (store.stopped) {
       console.log("Will hard stop model", store.stopped)
-      this.preloadModel("Stopping response stream")
       store.setStopped(false)
     }
   }

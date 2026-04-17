@@ -20,8 +20,8 @@ class OllamaApi {
   async getOllamaModels() {
     const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-    const maxRetries = 3;          // total attempts
-    const delayMs = 5000;          // 5 seconds between failed attempts
+    const maxRetries = 5;          // total attempts
+    const delayMs = 1000;          // 1 seconds between failed attempts
     let lastError;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -70,6 +70,26 @@ class OllamaApi {
 
     return await response.json();
   }
+
+  async getLoadedModels() {
+    const response = await fetch(this.getEndpointByOperation("ps"), {
+      method: "GET",
+      headers: { "Content-Type": "application/json" }
+    });
+
+    if (!response.ok) {
+      throw new Error("ollama-connection-error-api");
+    }
+
+    const data = await response.json();
+    return (data.models || []).map(m => m.name);
+  }
+
+  async isModelLoaded(modelName) {
+    const loaded = await this.getLoadedModels();
+    return loaded.includes(modelName);
+  }
+
 
 }
 

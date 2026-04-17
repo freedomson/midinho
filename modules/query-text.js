@@ -95,10 +95,16 @@ export class QueryText extends LitElement {
       if (this.isLoading?.()) return;
 
       this.submitQuery(this.textarea.value);
+      this.clear.setDisable(true);
       this.disable();
       this.setDisabled(true);
       this.textarea.value = "";
     }
+  }
+
+  onResponseStopped() {
+    this.clear.setDisable(false);    // ✅ enable Clear again
+    this.setDisabled(false);
   }
 
   /* ---------- Rendering ---------- */
@@ -140,7 +146,10 @@ export class QueryText extends LitElement {
         </md-query-start>
 
         <md-query-stop
-          .cancelCallBack=${this.cancelCallBack.bind(this)}>
+          .cancelCallBack=${() => {
+            this.cancelCallBack();
+            this.onResponseStopped();
+          }}>
         </md-query-stop>
 
         <md-query-clear

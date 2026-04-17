@@ -31,9 +31,13 @@ export class OllamaChat {
   getPromptByLanguage(langCode, query) {
     switch (langCode) {
       case "pt_PT":
-        return `És um assistente pessoal. Responde em português. Pergunta: ${query}`;
+        return
+        `És um assistente pessoal.
+        Pergunta: ${query}`;
       default:
-        return `You are a personal assistant. Reply in English. Question: ${query}`;
+        return
+        `You are a personal assistant.
+        Question: ${query}`;
     }
   }
 
