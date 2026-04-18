@@ -1,6 +1,7 @@
-import { LitElement, html, css } from './node_modules/lit-element/lit-element.js'
-import { consume } from './node_modules/@lit-labs/context/index.js';
+import { LitElement, html, css } from './node_modules/lit-element/lit-element.js';
 import { picocss } from './style.js';
+import { store } from './store.js';
+
 export class QueryClear extends LitElement {
 
   static styles = [picocss, css`
@@ -13,49 +14,47 @@ export class QueryClear extends LitElement {
   `];
 
   static properties = {
-    disabled: {type: Boolean},
-    clearCallBack: { type: Function},
+    disabled: { type: Boolean },
+    clearCallBack: { type: Function },
   };
 
   constructor() {
     super();
-    this.disabled = true
-    this.text = 'Clear'
+    this.disabled = true;
   }
 
-  execute(){
-    this.clearCallBack()
-    this.setDisable(true)
+  connectedCallback() {
+    super.connectedCallback();
+    store.subscribe(this);   // ✅ react to language changes
   }
 
-  setDisable(value){
-    this.disabled = value
+  disconnectedCallback() {
+    store.unsubscribe(this);
+    super.disconnectedCallback();
+  }
+
+  execute() {
+    if (this.disabled) return;
+    this.clearCallBack();
+    this.setDisable(true);
+  }
+
+  setDisable(value) {
+    this.disabled = value;
   }
 
   render() {
+    const label = store.t("common.clear");
+
     return html`
-      ${ this.disabled ?
-        html `
-          <div
-            class="outline"
-            id="md-query-clear-btn"
-            @click=${this.execute.bind(this)}
-            disabled
-            type="submit">
-            ${this.text}
-          </div>
-        `
-        :
-        html `
-          <div
-            class="outline"
-            id="md-query-clear-btn"
-            @click=${this.execute.bind(this)}
-            type="submit">
-            ${this.text}
-          </div>
-        `
-      }
+      <div
+        id="md-query-clear-btn"
+        @click=${this.disabled ? null : this.execute.bind(this)}
+        ?disabled=${this.disabled}
+        type="submit"
+      >
+        ${label}
+      </div>
     `;
   }
 }

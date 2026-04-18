@@ -1,58 +1,55 @@
-import { LitElement, html, css } from './node_modules/lit-element/lit-element.js'
+import { LitElement, html, css } from './node_modules/lit-element/lit-element.js';
 import { picocss } from './style.js';
-export class QueryStart extends LitElement {
+import { store } from './store.js';
 
+export class QueryStart extends LitElement {
   static styles = [picocss, css`
     #md-query-start-btn {
       float: left;
       margin-left: 0.5rem;
-      margin-bottom: 0px;
       min-width: 3rem;
     }
   `];
 
   static properties = {
-    disabled: {type: Boolean},
+    disabled: { type: Boolean },
   };
 
   constructor() {
     super();
-    this.disabled = true
-    this.text = 'Ask'
+    this.disabled = true;
   }
 
-  setDisable(value){
-    this.disabled = value
+  connectedCallback() {
+    super.connectedCallback();
+    store.subscribe(this);
   }
 
-  process(){
-    this.processQuery(true)
+  disconnectedCallback() {
+    store.unsubscribe(this);
+    super.disconnectedCallback();
+  }
+
+  setDisable(value) {
+    this.disabled = value;
+  }
+
+  process() {
+    this.processQuery(true);
   }
 
   render() {
+    const label = store.t("common.ask");
+
     return html`
-      ${ this.disabled ?
-        html `
-          <div
-            class="outline"
-            id="md-query-start-btn"
-            @click=${this.process}
-            disabled
-            type="submit">
-            ${this.text}
-          </div>
-        `
-        :
-        html `
-          <div
-            class="outline"
-            id="md-query-start-btn"
-            @click=${this.process}
-            type="submit">
-            ${this.text}
-          </div>
-        `
-      }
+      <div
+        id="md-query-start-btn"
+        @click=${this.disabled ? null : this.process}
+        ?disabled=${this.disabled}
+        type="submit"
+      >
+        ${label}
+      </div>
     `;
   }
 }

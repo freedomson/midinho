@@ -28,18 +28,17 @@ export class OllamaChat {
   /* -------------------------
    * Prompt selection (same idea as your Python)
    * ------------------------- */
-  getPromptByLanguage(langCode, query) {
-    switch (langCode) {
-      case "pt_PT":
-        return
-        `És um assistente pessoal.
-        Pergunta: ${query}`;
-      default:
-        return
-        `You are a personal assistant.
-        Question: ${query}`;
+    getPromptByLanguage(langCode, query) {
+      switch (langCode) {
+        case "pt_PT":
+          return `És um assistente pessoal.
+Pergunta: ${query}`;
+
+        default:
+          return `You are a personal assistant.
+Question: ${query}`;
+      }
     }
-  }
 
   /* -------------------------
    * History control

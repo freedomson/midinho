@@ -3,14 +3,15 @@ import './query-start.js';
 import './query-stop.js';
 import './query-clear.js';
 import './query-speak-selector.js';
-import './memory-info.js';              // ✅ reusable memory component
+import './memory-info.js';
 import { picocss } from './style.js';
+import { store } from './store.js';
 
 export class QueryText extends LitElement {
 
   static styles = [picocss, css`
     #md-query-text {
-      min-height: 3rem;
+      min-height: 8rem;
     }
     .aiwarn {
       text-align: center;
@@ -22,19 +23,30 @@ export class QueryText extends LitElement {
     disabled: { type: Boolean },
     submitQuery: { type: Function },
     cancelCallBack: { type: Function },
-    clearCallBack: { type: Function }
+    clearCallBack: { type: Function },
+    isLoading: { type: Function }, // ✅ ensure this exists as a property
+    errorMsg: { type: String }
   };
 
   constructor() {
     super();
     this.disabled = false;
-    this.errorMsg = false;
-    this.placeholder = 'Ask anything';
+    this.errorMsg = "";
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    store.subscribe(this); // ✅ rerender when language changes
+  }
+
+  disconnectedCallback() {
+    store.unsubscribe(this);
+    super.disconnectedCallback();
   }
 
   firstUpdated() {
     this.textarea = this.renderRoot.getElementById('md-query-text');
-    this.textarea.focus();
+    this.textarea?.focus();
   }
 
   updated() {
@@ -55,47 +67,56 @@ export class QueryText extends LitElement {
   }
 
   enable() {
-    this.start.setDisable(true);
-    this.stop.setDisable(true);
-    this.clear.setDisable(false);
+    this.start?.setDisable(true);
+    this.stop?.setDisable(true);
+    this.clear?.setDisable(false);
     this.setDisabled(false);
   }
 
   disable() {
-    this.textarea.value = "";
-    this.start.setDisable(true);
-    this.stop.setDisable(false);
+    if (this.textarea) this.textarea.value = "";
+    this.start?.setDisable(true);
+    this.stop?.setDisable(false);
   }
 
   disableClear() {
-    this.clear.setDisable(true);
+    this.clear?.setDisable(true);
   }
 
   updateContent(content) {
-    this.textarea.value = content;
+    if (this.textarea) this.textarea.value = content;
+  }
+
+  setErrorMsg(msg) {
+    this.errorMsg = msg || "";
   }
 
   /* ---------- Input handling ---------- */
 
   handleKeyup(e) {
-    const process = (e.keyCode === 13 && !e.shiftKey);
+    const process = (e.key === "Enter" && !e.shiftKey);
     this.processQuery(process);
   }
 
   processQuery(process) {
+    if (!this.textarea) return;
+
     if (this.isEmptyAfterTrim(this.textarea.value)) {
       this.textarea.value = "";
-      this.start.setDisable(true);
+      this.start?.setDisable(true);
       return;
     }
 
-    this.start.setDisable(false);
+    this.start?.setDisable(false);
 
     if (process) {
       if (this.isLoading?.()) return;
 
-      this.submitQuery(this.textarea.value);
-      this.clear.setDisable(true);
+      this.submitQuery?.(this.textarea.value);
+
+      // ✅ clear should be disabled while response is processed
+      this.clear?.setDisable(true);
+
       this.disable();
       this.setDisabled(true);
       this.textarea.value = "";
@@ -103,22 +124,23 @@ export class QueryText extends LitElement {
   }
 
   onResponseStopped() {
-    this.clear.setDisable(false);    // ✅ enable Clear again
+    this.clear?.setDisable(false);
     this.setDisabled(false);
   }
 
   /* ---------- Rendering ---------- */
 
   renderText() {
+    const placeholder = store.t("queryText.placeholder");
+
     if (this.errorMsg) {
       return html`
         <textarea
-          class="outline"
           id="md-query-text"
           aria-invalid="true"
-          placeholder="${this.placeholder}"
-          aria-label="${this.placeholder}"
-          @keyup=${this.handleKeyup}>
+          placeholder="${placeholder}"
+          aria-label="${placeholder}"
+          @keyup=${(e) => this.handleKeyup(e)}>
         </textarea>
         <small id="invalid-helper">${this.errorMsg}</small>
       `;
@@ -126,14 +148,13 @@ export class QueryText extends LitElement {
 
     return html`
       <textarea
-        class="outline"
         id="md-query-text"
-        placeholder="${this.placeholder}"
-        aria-label="${this.placeholder}"
+        placeholder="${placeholder}"
+        aria-label="${placeholder}"
         ?disabled=${this.disabled}
-        @keyup=${this.handleKeyup}>
-      </textarea>
+        @keyup=${(e) => this.handleKeyup(e)}></textarea>
     `;
+
   }
 
   render() {
@@ -142,29 +163,28 @@ export class QueryText extends LitElement {
 
       <fieldset role="group">
         <md-query-start
-          .processQuery=${this.processQuery.bind(this)}>
+          .processQuery=${(p) => this.processQuery(p)}>
         </md-query-start>
 
         <md-query-stop
           .cancelCallBack=${() => {
-            this.cancelCallBack();
+            this.cancelCallBack?.();
             this.onResponseStopped();
           }}>
         </md-query-stop>
 
         <md-query-clear
-          .clearCallBack=${this.clearCallBack.bind(this)}>
+          .clearCallBack=${() => this.clearCallBack?.()}>
         </md-query-clear>
 
         <md-speak-selector></md-speak-selector>
       </fieldset>
 
       <div class="aiwarn">
-        AI-generated content may be incorrect
+        ${store.t("queryText.aiWarning")}
       </div>
 
-      <!-- ✅ Reusable memory component -->
-      <md-memory-info />
+      <md-memory-info></md-memory-info>
 
       <br />
       <br />

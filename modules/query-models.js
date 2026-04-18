@@ -1,38 +1,28 @@
-import { LitElement, html, css } from './node_modules/lit-element/lit-element.js'
+import { LitElement, html, css } from './node_modules/lit-element/lit-element.js';
 import './query-models-download.js';
 import { consume } from './node_modules/@lit-labs/context/index.js';
 import { ollamamodelsContext } from './context.js';
 import OllamaApi from './api.js';
 import { picocss } from './style.js';
 import { store } from './store.js';
+
 export class QueryModels extends LitElement {
 
   static styles = [picocss, css`
-    #ollamamodel {
-    }
-    .grid {
-      min-width: 25rem;
-    }
+    .grid { min-width: 25rem; }
   `];
 
   static properties = {
-    ollamamodels: {type: Object}
-  };
+    ollamamodels: { type: Object },
 
-  hasModel() {
-    return this.ollamamodels.length;
-  }
+    // ✅ IMPORTANT: make it reactive so UI re-renders
+    showDownloadModel: { type: Boolean }
+  };
 
   constructor() {
     super();
-    this.textSelectModel = 'Please select LLM';
-    this.text = "Models"
-    this.showDownloadModel = false
-  }
-
-  toggleDownloadModel(){
-    this.showDownloadModel = !this.showDownloadModel;
-    this.requestUpdate();
+    this.showDownloadModel = false;
+    this.ollamamodels = [];
   }
 
   connectedCallback() {
@@ -47,50 +37,48 @@ export class QueryModels extends LitElement {
     super.disconnectedCallback();
   }
 
-  onContextUpdate = (e) => {
-    console.log('Received context update manually:', e.detail.value);
-    this.ollamamodels = e.detail.value;
-    this.requestUpdate();
-    // Updated via downloads
-    setTimeout((() => {
-      store.setModel(this.getSelectedModel());
-      this.preloadModel()
-    }).bind(this), 0);
+  hasModel() {
+    return Array.isArray(this.ollamamodels) && this.ollamamodels.length > 0;
   }
 
-  getSelectedModel(){
-    let selected = this.renderRoot.getElementById('ollamamodel');
-    return selected.value;
+  toggleDownloadModel() {
+    this.showDownloadModel = !this.showDownloadModel; // ✅ reactive now
+  }
+
+  onContextUpdate = (e) => {
+    this.ollamamodels = e.detail.value;
+
+    // Updated via downloads
+    queueMicrotask(() => {
+      store.setModel(this.getSelectedModel());
+      this.preloadModel();
+    });
+  };
+
+  getSelectedModel() {
+    const selected = this.renderRoot?.getElementById('ollamamodel');
+    return selected?.value;
   }
 
   getDownloadComponent() {
-    return html `
+    return html`
       <div
-        id="md-query-models-download"
         type="submit"
-        @click=${(()=>{
-          this.showDownloadModel = true
-          this.requestUpdate()
-        }).bind(this)}
-        class="outline">
-          ${this.text}
-        </div>
-    `
+        @click=${() => { this.showDownloadModel = true; }}>
+        ${store.t("queryModels.models")}
+      </div>
+    `;
   }
 
-  async unloadLoadModel(model){
-      const response = await fetch(OllamaApi.getEndpointByOperation("generate"), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: model,
-          prompt: '',
-          keep_alive: 0
-        })
-      });
+  async unloadLoadModel(model) {
+    await fetch(OllamaApi.getEndpointByOperation("generate"), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model, prompt: '', keep_alive: 0 })
+    });
   }
 
-async unloadLoadModels() {
+  async unloadLoadModels() {
     let loaded;
     try {
       loaded = await OllamaApi.getLoadedModels();
@@ -99,17 +87,12 @@ async unloadLoadModels() {
       return;
     }
 
-    if (!loaded.length) {
-      console.log("No models loaded");
-      return;
-    }
+    if (!loaded.length) return;
 
     for (const name of loaded) {
-      console.log("Unloading:", name);
       await this.unloadLoadModel(name);
     }
   }
-
 
   async waitForModelLoad(model, timeoutSeconds = 30, intervalMs = 1000) {
     const startTime = Date.now();
@@ -123,22 +106,14 @@ async unloadLoadModels() {
 
         const data = await response.json();
 
-        // Check if model is present
         if (data.models && data.models.some(m => m.name === model)) {
-          console.log(`Model "${model}" is now loaded.`);
           return true;
         }
 
-        // Check timeout
         const elapsed = (Date.now() - startTime) / 1000;
-        if (elapsed >= timeoutSeconds) {
-          console.warn(`Timeout waiting for model "${model}".`);
-          return false;
-        }
+        if (elapsed >= timeoutSeconds) return false;
 
-        // Wait before next poll
         await new Promise(resolve => setTimeout(resolve, intervalMs));
-
       } catch (error) {
         console.error("Error while checking model status:", error);
         return false;
@@ -146,36 +121,20 @@ async unloadLoadModels() {
     }
   }
 
-async preloadModel(msg) {
+  async preloadModel() {
     const model = this.getSelectedModel();
 
-    if (model === "no_model") {
-      console.log(`Model ${model} nop.`);
-      return;
-    }
+    if (!model || model === "no_model") return;
 
-    store.setLoading(msg ? msg : `Model ${model} preload started.`);
-    console.log(`Model ${model} preload started.`);
+    store.setLoading(store.t("queryModels.preloadStarted", { model }));
 
     try {
-      // ✅ NEW: short-circuit if already loaded
       const alreadyLoaded = await OllamaApi.isModelLoaded(model);
-      if (alreadyLoaded) {
-        console.log(`Model "${model}" already loaded. Skipping load.`);
-        store.setLoading(false);
-        return;
-      }
+      if (alreadyLoaded) return;
 
-      // keep your existing behavior when not loaded:
       await this.unloadLoadModels();
-
       await OllamaApi.loadModelFromSystem(model);
-      console.log(`Model ${model} preloaded successfully.`);
-
-      const isLoaded = await this.waitForModelLoad(model);
-      if (!isLoaded) {
-        console.log("Model failed to load in time");
-      }
+      await this.waitForModelLoad(model);
     } catch (err) {
       console.error("Error:", err);
     } finally {
@@ -184,60 +143,54 @@ async preloadModel(msg) {
   }
 
   onChange() {
-    this.preloadModel()
+    this.preloadModel();
     store.setModel(this.getSelectedModel());
   }
 
   firstUpdated() {
-    this.preloadModel()
+    this.preloadModel();
     store.setModel(this.getSelectedModel());
   }
 
   updated() {
-    if (store.stopped) {
-      console.log("Will hard stop model", store.stopped)
-      store.setStopped(false)
-    }
+    if (store.stopped) store.setStopped(false);
   }
 
   renderModelList() {
-    return html `
+    return html`
       <select
-          class="outline"
-          id="ollamamodel"
-          aria-label="${this.textSelectModel}"
-          @change=${this.onChange}
-          required>
-          ${
-          this.hasModel() &&  !this.showDownloadModel ?
-            this.ollamamodels.sort().map((model, index) => html`
-              <option ${index==0?"selected":""} value="${model}">${model}</option>
+        id="ollamamodel"
+        aria-label="${store.t("queryModels.selectModel")}"
+        @change=${() => this.onChange()}
+        required>
+        ${this.hasModel() && !this.showDownloadModel
+          ? this.ollamamodels.sort().map((model, index) => html`
+              <option value="${model}" ?selected=${index === 0}>${model}</option>
             `)
-          :
-          html `<option value="no_model">No model found</option>`
-        }
+          : html`
+              <option value="no_model">${store.t("queryModels.noModel")}</option>
+            `}
       </select>
-    `
+    `;
   }
 
   render() {
     return html`
       <fieldset role="group">
-      ${
-        this.showDownloadModel ?
-          html `
-          <md-query-models-download
-            .callback=${this.toggleDownloadModel.bind(this)}>
-          </md-query-models-download>`
-        :
-          html`
-            ${this.renderModelList()}
-            ${this.getDownloadComponent()}
-          `
-      }
+        ${this.showDownloadModel
+          ? html`
+              <md-query-models-download
+                .callback=${() => this.toggleDownloadModel()}>
+              </md-query-models-download>
+            `
+          : html`
+              ${this.renderModelList()}
+              ${this.getDownloadComponent()}
+            `}
       </fieldset>
     `;
   }
 }
+
 consume({ context: ollamamodelsContext })(QueryModels.prototype, 'ollamamodels');
 customElements.define('md-query-models', QueryModels);

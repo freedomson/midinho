@@ -65,7 +65,7 @@ export class Error extends LitElement {
           <br/>
           <br/>
           <div>
-            <div class="outline contrast">
+            <div class="contrast">
               <summary>
               <div>
                 <svg fill="currentColor" stroke-width="0" viewBox="0 0 448 512" class="icon" xmlns="http://www.w3.org/2000/svg">
@@ -79,7 +79,7 @@ $env:OLLAMA_ORIGINS="https://${this.domain}"; ollama serve
 </code></pre>
               <br/>
             </div>
-            <div class="outline contrast">
+            <div class="contrast">
               <summary>
                 <div>
                   <svg fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg">
@@ -93,7 +93,7 @@ export OLLAMA_ORIGINS="https://${this.domain}" && ollama serve
 </pre></code>
               <br/>
             </div>
-            <div class="outline contrast">
+            <div class="contrast">
               <summary>
                 <div>
                     <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 448 512" class="icon" xmlns="http://www.w3.org/2000/svg">

@@ -1,5 +1,6 @@
 import { LitElement, html, css } from './node_modules/lit-element/lit-element.js';
 import { picocss } from './style.js';
+import { store } from './store.js';
 
 export class MemoryInfo extends LitElement {
 
@@ -25,7 +26,7 @@ export class MemoryInfo extends LitElement {
   constructor() {
     super();
     this.endpoint = 'http://localhost:8081/free-memory';
-    this.intervalMs = 1000; // default 30s
+    this.intervalMs = 111000;
     this.freeMemoryMb = null;
     this.error = '';
     this._timer = null;
@@ -33,12 +34,14 @@ export class MemoryInfo extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
+    store.subscribe(this);            // ✅ react to language changes
     this._fetch();
     this._timer = setInterval(() => this._fetch(), this.intervalMs);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
+    store.unsubscribe(this);
     if (this._timer) {
       clearInterval(this._timer);
       this._timer = null;
@@ -53,7 +56,7 @@ export class MemoryInfo extends LitElement {
       });
 
       if (!res.ok) {
-        this.error = `endpoint error (${res.status})`;
+        this.error = `${store.t("memoryInfo.endpointError")} (${res.status})`;
         this.freeMemoryMb = null;
         return;
       }
@@ -65,20 +68,22 @@ export class MemoryInfo extends LitElement {
         this.freeMemoryMb = mb;
         this.error = '';
       } else {
-        this.error = 'invalid payload';
+        this.error = store.t("memoryInfo.invalidPayload");
         this.freeMemoryMb = null;
       }
     } catch {
-      this.error = 'fetch failed';
+      this.error = store.t("memoryInfo.fetchFailed");
       this.freeMemoryMb = null;
     }
   }
 
   render() {
+    const title = store.t("memoryInfo.title");
+
     if (this.error) {
       return html`
         <div class="meminfo">
-          Free memory: <span class="error">${this.error}</span>
+          ${title}: <span class="error">${this.error}</span>
         </div>
       `;
     }
@@ -86,14 +91,14 @@ export class MemoryInfo extends LitElement {
     if (this.freeMemoryMb === null) {
       return html`
         <div class="meminfo">
-          Free memory: <em>loading…</em>
+          ${title}: <em>${store.t("memoryInfo.loading")}</em>
         </div>
       `;
     }
 
     return html`
       <div class="meminfo">
-        Free memory: <strong>${this.freeMemoryMb}</strong> MB
+        ${title}: <strong>${this.freeMemoryMb}</strong> MB
       </div>
     `;
   }

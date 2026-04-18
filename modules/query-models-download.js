@@ -3,6 +3,7 @@ import OllamaApi from './api.js';
 import { ollamamodelsContext } from './context.js';
 import { consume } from './node_modules/@lit-labs/context/index.js';
 import { picocss, picocsscolor } from './style.js';
+import { store } from './store.js';
 
 export class QueryModelsDownload extends LitElement {
   static styles = [
@@ -41,27 +42,15 @@ export class QueryModelsDownload extends LitElement {
   constructor() {
     super();
 
-    // UI state
     this.busy = false;
     this.callback = null;
     this.ollamamodels = [];
 
-    // Download stream abort controller
     this.abortController = new AbortController();
 
-    // Progress
     this.downloadingProgressValue = 0;
     this.downloadingProgressStatus = "";
     this.downloadingProgressStatusProgress = "";
-
-    // Labels
-    this.text = {
-      download: "Download",
-      delete: "Delete",
-      cancel: "Cancel",
-      close: "Close",
-      title: "Download Model",
-    };
 
     // Memory defaults
     this.freeMemoryMb = null;
@@ -71,30 +60,32 @@ export class QueryModelsDownload extends LitElement {
 
     // Internal polling control
     this._memTimer = null;
-    this._memAbort = null;     // abort in-flight memory fetch
-    this._memInFlight = false; // prevent overlapping polls
+    this._memAbort = null;
+    this._memInFlight = false;
 
     // Model catalog
     this.defaultModels = [
-      { "name": "smollm2:135m", "size": 0.271 * 1024 * 1024 * 1024, "context": "8K", "input": ["text"] },
-      { "name": "gemma3:4b", "size": 3.3 * 1024 * 1024 * 1024, "context": "128K", "input": ["text", "image"] },
-      { "name": "gemma3:12b", "size": 8.1 * 1024 * 1024 * 1024, "context": "128K", "input": ["text", "image"] },
-      { "name": "llama3.1:8b", "size": 4.9 * 1024 * 1024 * 1024, "context": "128K", "input": ["text"] },
-      { "name": "llama3.2:3b", "size": 2 * 1024 * 1024 * 1024, "context": "128K", "input": ["text"] },
-      { "name": "deepseek-r1:14b", "size": 9.0 * 1024 * 1024 * 1024, "context": "128K", "input": ["text"] },
-      { "name": "deepseek-r1:1.5b", "size": 1.1 * 1024 * 1024 * 1024, "context": "128K", "input": ["text"] },
-      { "name": "qwen3:8b", "size": 5.2 * 1024 * 1024 * 1024, "context": "40K", "input": ["text"] },
-      { "name": "mistral:7b", "size": 4.4 * 1024 * 1024 * 1024, "context": "40K", "input": ["text"] },
-      { "name": "gemma4:e4b", "size": 9.6 * 1024 * 1024 * 1024, "context": "128K", "input": ["text", "image"] }
+      { name: "smollm2:135m",       size: 0.271 * 1024 * 1024 * 1024, context: "8K",   input: ["text"] },
+      { name: "gemma3:4b",         size: 3.3   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"] },
+      { name: "gemma3:12b",        size: 8.1   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"] },
+      { name: "llama3.1:8b",       size: 4.9   * 1024 * 1024 * 1024, context: "128K", input: ["text"] },
+      { name: "llama3.2:3b",       size: 2.0   * 1024 * 1024 * 1024, context: "128K", input: ["text"] },
+      { name: "deepseek-r1:14b",   size: 9.0   * 1024 * 1024 * 1024, context: "128K", input: ["text"] },
+      { name: "deepseek-r1:1.5b",  size: 1.1   * 1024 * 1024 * 1024, context: "128K", input: ["text"] },
+      { name: "qwen3:8b",          size: 5.2   * 1024 * 1024 * 1024, context: "40K",  input: ["text"] },
+      { name: "mistral:7b",        size: 4.4   * 1024 * 1024 * 1024, context: "40K",  input: ["text"] },
+      { name: "gemma4:e4b",        size: 9.6   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"] }
     ];
   }
 
   connectedCallback() {
     super.connectedCallback();
+    store.subscribe(this);          // ✅ i18n updates on lang change
     this._startMemoryPolling();
   }
 
   disconnectedCallback() {
+    store.unsubscribe(this);
     this._stopMemoryPolling();
     this._abortMemoryFetch();
     super.disconnectedCallback();
@@ -105,14 +96,8 @@ export class QueryModelsDownload extends LitElement {
   _startMemoryPolling() {
     if (this._memTimer) return;
 
-    // immediate refresh
-    this._fetchFreeMemory();
-
-    // periodic refresh
-    this._memTimer = setInterval(
-      () => this._fetchFreeMemory(),
-      this.memoryIntervalMs
-    );
+    this._fetchFreeMemory(); // immediate
+    this._memTimer = setInterval(() => this._fetchFreeMemory(), this.memoryIntervalMs);
   }
 
   _stopMemoryPolling() {
@@ -130,11 +115,9 @@ export class QueryModelsDownload extends LitElement {
   }
 
   async _fetchFreeMemory() {
-    // Prevent overlap if the endpoint is slow
     if (this._memInFlight) return;
     this._memInFlight = true;
 
-    // Abort previous memory fetch if any
     this._abortMemoryFetch();
     this._memAbort = new AbortController();
 
@@ -154,7 +137,6 @@ export class QueryModelsDownload extends LitElement {
       const mb = Number(data.free_mb);
 
       if (Number.isFinite(mb)) {
-        // Only update if changed (reduces unnecessary renders)
         if (this.freeMemoryMb !== mb || this.memoryError) {
           this.freeMemoryMb = mb;
           this.memoryError = "";
@@ -163,9 +145,7 @@ export class QueryModelsDownload extends LitElement {
         this._setMemoryState(null, "invalid payload");
       }
     } catch (e) {
-      if (e?.name === "AbortError") {
-        // ignore aborted memory polling fetch
-      } else {
+      if (e?.name !== "AbortError") {
         this._setMemoryState(null, "fetch failed");
       }
     } finally {
@@ -174,10 +154,7 @@ export class QueryModelsDownload extends LitElement {
   }
 
   _setMemoryState(mbOrNull, errMsg) {
-    const changed =
-      this.freeMemoryMb !== mbOrNull ||
-      this.memoryError !== errMsg;
-
+    const changed = this.freeMemoryMb !== mbOrNull || this.memoryError !== errMsg;
     if (changed) {
       this.freeMemoryMb = mbOrNull;
       this.memoryError = errMsg || "";
@@ -185,24 +162,25 @@ export class QueryModelsDownload extends LitElement {
   }
 
   renderFreeMemoryLine() {
+    const label = store.t("queryModelsDownload.freeMemory");
+
     if (this.memoryError) {
       return html`
         <div class="memline">
-          Free memory:
-          <span class="memerr">${this.memoryError}</span>
+          ${label}: <span class="memerr">${this.memoryError}</span>
         </div>
       `;
     }
     if (this.freeMemoryMb === null) {
       return html`
         <div class="memline">
-          Free memory: <em>loading…</em>
+          ${label}: <em>${store.t("queryModelsDownload.loading")}</em>
         </div>
       `;
     }
     return html`
       <div class="memline">
-        Free memory: <strong>${this.freeMemoryMb}</strong> MB
+        ${label}: <strong>${this.freeMemoryMb}</strong> MB
       </div>
     `;
   }
@@ -210,7 +188,6 @@ export class QueryModelsDownload extends LitElement {
   /* ---------------- Model List / Merge ---------------- */
 
   mergeArray(arr1, arr2) {
-    // Prefer arr1 items, fill gaps from arr2 by name
     const map = new Map();
     for (const item of [...arr2, ...arr1]) {
       if (!item?.name) continue;
@@ -237,9 +214,7 @@ export class QueryModelsDownload extends LitElement {
 
   setBusy(value) {
     this.busy = value;
-
-    // Optional: reduce load while download/delete running
-    // Comment out these two lines if you want memory to keep updating while busy
+    // If you want to pause polling when busy:
     // if (this.busy) this._stopMemoryPolling();
     // else this._startMemoryPolling();
   }
@@ -261,7 +236,6 @@ export class QueryModelsDownload extends LitElement {
     return (Math.round(num * 100) / 100).toFixed(2);
   }
 
-  // Free memory delta (GB) after model size
   getFreeGB(sizeBytes) {
     if (this.freeMemoryMb == null) return null;
     const freeGb = this.freeMemoryMb / 1024;
@@ -269,10 +243,11 @@ export class QueryModelsDownload extends LitElement {
     return Number(freeGb - modelGb).toFixed(1);
   }
 
-  getFreeGBClass(sizeBytes) {
+  getFreeGBClass(sizeBytes, background = false) {
     const delta = this.getFreeGB(sizeBytes);
+    let bck = background ? 'background' : 'color'
     if (delta == null) return "";
-    return Number(delta) > 0 ? "pico-color-green-650" : "pico-color-red-650";
+    return Number(delta) > 0 ? `pico-${bck}-green-650` : `pico-${bck}-yellow-650`;
   }
 
   /* ---------------- Actions ---------------- */
@@ -280,9 +255,8 @@ export class QueryModelsDownload extends LitElement {
   async downloadModel(modelName) {
     this.setBusy(true);
 
-    // Reset progress
     this.downloadingProgressValue = 0;
-    this.downloadingProgressStatus = `${modelName}: starting…`;
+    this.downloadingProgressStatus = `${modelName}: ${store.t("queryModelsDownload.starting")}`;
     this.downloadingProgressStatusProgress = "";
 
     const response = await fetch(OllamaApi.getEndpointByOperation('pull'), {
@@ -326,7 +300,7 @@ export class QueryModelsDownload extends LitElement {
           this.downloadingProgressStatus = `${modelName}: ${r.status}`;
         }
       } catch {
-        // Ignore partial / non-JSON chunks
+        // ignore
       }
     }
 
@@ -362,10 +336,10 @@ export class QueryModelsDownload extends LitElement {
     if (!installed) {
       return html`
         <button
-          class="btn-mini pico-background-green-650"
+          class="btn-mini pico-background-green-650 ${this.getFreeGBClass(model.size, true)}"
           @click=${() => this.downloadModel(model.name)}
           ?disabled=${this.busy}>
-          ${this.text.download}
+          ${store.t("queryModelsDownload.download")}
         </button>
       `;
     }
@@ -375,7 +349,7 @@ export class QueryModelsDownload extends LitElement {
         class="btn-mini pico-background-red-650"
         @click=${() => this.deleteModel(model.name)}
         ?disabled=${this.busy}>
-        ${this.text.delete}
+        ${store.t("queryModelsDownload.delete")}
       </button>
     `;
   }
@@ -389,7 +363,7 @@ export class QueryModelsDownload extends LitElement {
           <header>
             <div class="grid">
               <div>
-                <h1>${this.text.title}</h1>
+                <h1>${store.t("queryModelsDownload.title")}</h1>
                 ${this.renderFreeMemoryLine()}
               </div>
 
@@ -397,8 +371,9 @@ export class QueryModelsDownload extends LitElement {
                 ? html``
                 : html`
                     <div align="right">
-                      <button class="outline contrast" @click=${() => this.finish()}>
-                        ${this.text.close}
+                      <button
+                        @click=${() => this.finish()}>
+                        ${store.t("queryModelsDownload.close")}
                       </button>
                     </div>
                   `}
@@ -412,18 +387,20 @@ export class QueryModelsDownload extends LitElement {
               <span id="status-progress">${this.downloadingProgressStatusProgress}</span>
             </div>
             <br/>
-            <button class="outline" @click=${() => this.cancelDownload()}>
-              ${this.text.cancel}
+            <button @click=${() => this.cancelDownload()}>
+              ${store.t("queryModelsDownload.cancel")}
             </button>
+            <br/>
+            <br/>
           ` : ''}
 
           <table>
             <thead>
               <tr>
-                <th scope="col">Model</th>
-                <th scope="col">Size</th>
-                <th scope="col">Delta</th>
-                <th scope="col">Action</th>
+                <th scope="col">${store.t("queryModelsDownload.model")}</th>
+                <th scope="col">${store.t("queryModelsDownload.size")}</th>
+                <th scope="col">${store.t("queryModelsDownload.delta")}</th>
+                <th scope="col">${store.t("queryModelsDownload.action")}</th>
               </tr>
             </thead>
 
@@ -474,6 +451,5 @@ export class QueryModelsDownload extends LitElement {
   }
 }
 
-// ✅ Apply context consumption ONCE (no manual consumer creation needed)
 consume({ context: ollamamodelsContext })(QueryModelsDownload.prototype, 'ollamamodels');
 customElements.define('md-query-models-download', QueryModelsDownload);

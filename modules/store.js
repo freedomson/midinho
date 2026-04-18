@@ -1,21 +1,48 @@
+import { i18n, DEFAULT_LANG } from "./i18n.js";
+
 class Store {
+
   constructor() {
+    // ✅ INITIAL LANGUAGE
+    this.lang = DEFAULT_LANG;
     this.loading = false;
     this.stopped = false;
     this.model = false;
     this.speak = false;
-    this.lang = "";
-    this.speakerWorker = false
+    this.speakerWorker = false;
     this._subscribers = new Set();
+  }
+
+
+  t(path, params = {}, fallback = "") {
+    const pack = i18n[this.lang] ?? i18n[DEFAULT_LANG];
+    let text = path.split('.').reduce(
+      (obj, key) => (obj && obj[key] !== undefined ? obj[key] : null),
+      pack
+    );
+
+    if (!text) return fallback;
+
+    // ✅ simple interpolation
+    return text.replace(/\{(\w+)\}/g, (_, k) => params[k] ?? `{${k}}`);
+  }
+
+  updateDirection(lang) {
+    const rtl = new Set(["ar"]);
+    document.documentElement.setAttribute(
+      "dir",
+      rtl.has(lang) ? "rtl" : "ltr"
+    );
+  }
+
+  setLang(value) {
+    this.lang = value || DEFAULT_LANG;
+    this.updateDirection(this.lang);
+    this._notify();
   }
 
   setStopped(value) {
     this.stopped = value;
-    this._notify();
-  }
-
-  setLang(value) {
-    this.lang = value;
     this._notify();
   }
 

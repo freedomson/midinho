@@ -157,9 +157,10 @@ export class Query extends LitElement {
   }
 
   render() {
+    const label = store.t("query.welcome");
     return html`
       <p class="md-query-welcome">
-        ${this.messageWelcome}
+        ${label}
       </p>
 
       <div id="query-response">

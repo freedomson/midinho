@@ -26,4 +26,6 @@ self.onmessage = function (e) {
   const { speachStr, speachStrTokens, final } = e.data;
   const audioNode = generateAudioNode(speachStr);
   self.postMessage({...audioNode, speachStrTokens, final});
+  // Preload
+  tts.generate({ text: ".", sid: 0, speed: 1 });
 };
