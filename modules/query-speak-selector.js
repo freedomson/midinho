@@ -2,12 +2,10 @@ import { LitElement, html, css } from './node_modules/lit-element/lit-element.js
 import { picocss } from './style.js';
 import { store } from './store.js';
 import { i18n, DEFAULT_LANG } from './i18n.js';
+import { WorkerPool } from "./workerPool.js"
 
 export class Header extends LitElement {
   static styles = [picocss, css`
-    .md-speak-selector {
-      min-width: 10rem;
-    }
 
     .speak-toggle {
       display: inline-flex;
@@ -48,30 +46,44 @@ export class Header extends LitElement {
     this.setupSpeakerWorker();
   }
 
-  setupSpeakerWorker() {
-    const enabled = store.speak;
-    const lang = store.lang;
 
-    if (!enabled || !lang) {
-      store.setSpeakerWorker(false);
-      store.setLoading(false);
-      return;
-    }
+setupSpeakerWorker() {
+  const enabled = store.speak;
+  const lang = store.lang;
 
-    if (store.speakerWorker) {
-      store.speakerWorker.terminate();
-    }
-
-    const worker = new Worker(`/modules/tts/audioWorker.js`);
-    worker.postMessage({ lang, init: true });
-
-    store.setSpeakerWorker(worker);
-    store.setLoading(true);
-
-    worker.onmessage = (evt) => {
-      store.setLoading(evt.data.status);
-    };
+  if (!enabled || !lang) {
+    store.setSpeakerWorker(false);
+    store.setLoading(false);
+    return;
   }
+
+  if (store.speakerWorker) {
+    store.speakerWorker.terminate();
+  }
+
+  const pool = new WorkerPool('/modules/tts/audioWorker.js');
+
+  pool.post({ init: true, lang });
+
+  // TODO
+  // "Downloading data... (198180864/199943572)"
+  // "Running...""
+  store.setLoading(true);
+  pool.addListener(evt => {
+
+    if (evt.status === "all-workers-ready") {
+      store.setLoading(false);
+      console.log("--- all workers ready ---")
+    }
+
+    // if (evt.status !== undefined) {
+    //   store.setLoading(evt.status);
+    // }
+  });
+
+  store.setSpeakerWorker(pool);
+  store.setLoading(true);
+}
 
   /* ---------- Helpers ---------- */
 

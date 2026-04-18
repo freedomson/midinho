@@ -34,9 +34,8 @@ export class QueryClear extends LitElement {
   }
 
   execute() {
-    if (this.disabled) return;
-    this.clearCallBack();
     this.setDisable(true);
+    this.clearCallBack();
   }
 
   setDisable(value) {

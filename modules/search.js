@@ -55,47 +55,65 @@ export class Search extends LitElement {
   }
 
   firstUpdated() {
-    let containerEl = this.renderRoot.getElementById("search-query")
-    let q = this.msg.query.replace(/\n/g, "<br>")
-    containerEl.innerHTML = q
+    const containerEl = this.renderRoot.getElementById("search-query");
+    const q = this.msg.query.replace(/\n/g, "<br>");
+    containerEl.innerHTML = q;
+    // No worker.onmessage here anymore — WorkerPool handles everything
+  }
 
-    if(this.worker)
-      this.worker.onmessage = ((e) => {
-        const audio = e.data.audio;
-        const sampleRate = e.data.sampleRate;
-        const speachStrTokens = e.data.speachStrTokens;
-        const final = e.data.final;
+  enqueueSpeech(token, final = false) {
+    // Strip HTML + markdown noise for TTS
+    const p1Stage = token.replace(/<[^>]*>?/gm, "");
+    const p2Stage = p1Stage.replace(/[*,#]/g, "");
+
+    this.speachStringQueue.push(p2Stage);
+    this.speachTokenQueue.push(token);
+
+    if (/[\n]/.test(token)) {
+      const speachStr = this.speachStringQueue.splice(0).join("");
+      const speachStrTokens = this.speachTokenQueue.splice(0);
+
+    this.worker.run({ speachStr, speachStrTokens, final })
+      .then((e) => {
+        const audio = e.audio;
+        const sampleRate = e.sampleRate;
+
         if (!this.audioCtx)
-            this.audioCtx = new AudioContext({sampleRate : sampleRate});
+          this.audioCtx = new AudioContext({ sampleRate });
+
+        if (this.audioCtx.state === "suspended") {
+          this.audioCtx.resume();
+        }
+
         const buffer = this.audioCtx.createBuffer(1, audio.samples.length, sampleRate);
         const ptr = buffer.getChannelData(0);
+
         for (let i = 0; i < audio.samples.length; i++) {
           ptr[i] = audio.samples[i];
         }
+
         const source = this.audioCtx.createBufferSource();
         source.buffer = buffer;
         source.connect(this.audioCtx.destination);
+
         this.processedQ.push({
           audioNode: source,
-          speachTokenQueue: speachStrTokens,
-          final
+          speachTokenQueue: e.speachStrTokens,
+          final: e.final
         });
-        this.processSpeach();
-      }).bind(this);
-  }
 
-  enqueueSpeech(token, final=false) {
-    let p1Stage = token.replace(/<[^>]*>?/gm, '');
-    let p2Stage = p1Stage.replace(/[*,#]/g, '');
-    this.speachStringQueue.push(p2Stage);
-    this.speachTokenQueue.push(token);
-    // console.log(JSON.stringify(token))
-    if (/[\n]/.test(token)) {
-      let speachStr = this.speachStringQueue.splice(0, this.speachStringQueue.length).join('')
-      let speachStrTokens = this.speachTokenQueue.splice(0, this.speachTokenQueue.length)
-      this.worker.postMessage({ speachStr, speachStrTokens, final });
+        this.processSpeach();
+      })
+      .catch(err => {
+        if (err.message === "WorkerPool reset") {
+          // expected cancellation — ignore
+          return;
+        }
+        console.error("WorkerPool job failed:", err);
+      });
+
+      }
     }
-  }
 
   async processSpeach() {
     if (this.isSpeaking) {
@@ -117,8 +135,8 @@ export class Search extends LitElement {
       }
 
     }).bind(this);
-    await this.printWithDelay.call(this, qelement.speachTokenQueue);
     qelement.audioNode.start();
+    await this.printWithDelay.call(this, qelement.speachTokenQueue);
   }
 
   async printWithDelay(printTextTokens) {
@@ -227,19 +245,24 @@ export class Search extends LitElement {
   }
 
   cancel(cb) {
+    console.log("---------------------- SEARCH >> CANCEL ------------------------")
     try {
-      if (this.audioCtx.state !== 'closed') {
-        if (this.audioCtx.close)
-          this.audioCtx.close().catch(console.error);
+      if (this.audioCtx && this.audioCtx.state !== 'closed') {
+        this.audioCtx.close().catch(console.error);
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-    if(this.worker)
-      this.worker.onmessage = () => {}
+
+    if (this.worker) {
+       console.log("---------------------- SEARCH >> CANCEL >> Reset worker ------------------------")
+      this.worker.reset(); // ✅ pool terminate
+    }
+
     this.loading = false;
     this.processedQ = [];
-    cb()
+
+    cb();
   }
 
   render() {
@@ -252,7 +275,7 @@ export class Search extends LitElement {
         <div id="search-response">
         </div>
         ${!this.loading ? html`
-          <div>
+          <div class="container">
             <small>
               ${this.msg.model}
             </small>

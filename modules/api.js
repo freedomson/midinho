@@ -71,6 +71,22 @@ class OllamaApi {
     return await response.json();
   }
 
+  async stopModelFromSystem(modelName) {
+    console.log(modelName)
+    const response = await fetch("http://localhost:8081/stop-model", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: modelName })
+    });
+
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      throw new Error(detail || "python-stop-model-error");
+    }
+
+    return await response.json();
+  }
+
   async getLoadedModels() {
     const response = await fetch(this.getEndpointByOperation("ps"), {
       method: "GET",

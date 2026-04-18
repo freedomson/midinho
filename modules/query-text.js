@@ -167,8 +167,8 @@ export class QueryText extends LitElement {
         </md-query-start>
 
         <md-query-stop
-          .cancelCallBack=${() => {
-            this.cancelCallBack?.();
+          .cancelCallBack=${(err) => {
+            this.cancelCallBack?.(err);
             this.onResponseStopped();
           }}>
         </md-query-stop>

@@ -1,21 +1,19 @@
 // audioWorker.js
 var lang = ""
 
-function generateBtn(text) {
+function generateAudioNode(text) {
+  console.log("--------------- AUDIOWORKER  >>>> GENERATING --------------------", text)
   let speakerId = 0
   let speedInput = 1
   let audio = tts.generate({text : text, sid : speakerId, speed : speedInput});
+  console.log("--------------- AUDIOWORKER  <<<< GENERATED--------------------", text)
   return {audio,sampleRate: tts.sampleRate};
-}
-
-function generateAudioNode(str) {
-  return generateBtn(str);
 }
 
 self.onmessage = function (e) {
 
   if (e.data?.init) {
-    console.log("Initialize worker")
+    console.log("--------------- AUDIOWORKER Initialize worker ---------------")
     lang = e.data.lang
     importScripts('./app-tts.js');
     importScripts('./sherpa-onnx-tts.js');
@@ -23,9 +21,13 @@ self.onmessage = function (e) {
     return;
   }
 
-  const { speachStr, speachStrTokens, final } = e.data;
+  console.log("--------------- AUDIOWORKER  onmessage ---------------")
+  const { id, speachStr, speachStrTokens, final } = e.data;
   const audioNode = generateAudioNode(speachStr);
-  self.postMessage({...audioNode, speachStrTokens, final});
-  // Preload
-  tts.generate({ text: ".", sid: 0, speed: 1 });
+  self.postMessage({
+    id, // ✅ CRITICAL
+    ...audioNode,
+    speachStrTokens,
+    final
+  });
 };

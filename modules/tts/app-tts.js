@@ -38,11 +38,13 @@ Module.setStatus = function(status) {
 
 Module.onRuntimeInitialized = function() {
   //console.log('Model files downloaded!');
-  // console.log('Initializing tts ......');
+  console.log('Initializing tts ......');
   tts = createOfflineTts(Module)
+  // Preload
+  tts.generate({ text: ".", sid: 0, speed: 1 });
   // if (tts.numSpeakers > 1) {
   //   speakerIdLabel.innerHTML = `Speaker ID (0 - ${tts.numSpeakers - 1}):`;
   // }
-
+  self.postMessage({ workerReady: true });
   // generateBtn.disabled = false;
 };

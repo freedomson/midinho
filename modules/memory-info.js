@@ -26,7 +26,7 @@ export class MemoryInfo extends LitElement {
   constructor() {
     super();
     this.endpoint = 'http://localhost:8081/free-memory';
-    this.intervalMs = 111000;
+    this.intervalMs = 1000;
     this.freeMemoryMb = null;
     this.error = '';
     this._timer = null;

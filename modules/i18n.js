@@ -19,7 +19,9 @@ export const i18n = {
     },
 
     query: {
-      welcome: "What can I help with?"
+      welcome: "What can I help with?",
+      systemPrompt: "You are a personal assistant.",
+      questionLabel: "Question"
     },
 
     queryText: {
@@ -60,7 +62,7 @@ export const i18n = {
 
   pt_PT: {
     common: {
-      ask: "Perguntar",
+      ask: "Enviar",
       cancel: "Cancelar",
       close: "Fechar",
       delete: "Apagar",
@@ -76,7 +78,9 @@ export const i18n = {
     },
 
     query: {
-      welcome: "Em que posso ajudar?"
+      welcome: "Em que posso ajudar?",
+      systemPrompt: "És um assistente pessoal.",
+      questionLabel: "Pergunta"
     },
 
     queryText: {
@@ -97,7 +101,7 @@ export const i18n = {
       size: "Tamanho",
       delta: "Delta",
       action: "Ação",
-      download: "Transferir",
+      download: "Copiar",
       delete: "Apagar",
       cancel: "Cancelar",
       close: "Fechar",
@@ -117,23 +121,25 @@ export const i18n = {
 
   es_ES: {
     common: {
-      ask: "Preguntar",
+      ask: "Enviar",
       cancel: "Cancelar",
       close: "Cerrar",
       delete: "Eliminar",
       download: "Descargar",
       loading: "Cargando…",
-      stop: "Detener",
+      stop: "Parar",
       clear: "Limpiar"
     },
 
     header: {
       language: "Español",
-      speak: "Hablar respuestas"
+      speak: "Hablar"
     },
 
     query: {
-      welcome: "¿En qué puedo ayudarte?"
+      welcome: "¿En qué puedo ayudarte?",
+      systemPrompt: "Eres un asistente personal.",
+      questionLabel: "Pregunta"
     },
 
     queryText: {
@@ -190,7 +196,9 @@ export const i18n = {
     },
 
     query: {
-      welcome: "我能帮你什么？"
+      welcome: "我能帮你什么？",
+      systemPrompt: "你是一个个人助手。",
+      questionLabel: "问题"
     },
 
     queryText: {
@@ -247,7 +255,9 @@ export const i18n = {
     },
 
     query: {
-      welcome: "मैं आपकी क्या मदद कर सकता हूँ?"
+      welcome: "मैं आपकी क्या मदद कर सकता हूँ?",
+      systemPrompt: "आप एक व्यक्तिगत सहायक हैं।",
+      questionLabel: "प्रश्न"
     },
 
     queryText: {
@@ -260,21 +270,6 @@ export const i18n = {
       models: "मॉडल",
       noModel: "कोई मॉडल नहीं मिला",
       preloadStarted: "मॉडल लोड हो रहा है {model}"
-    },
-
-    queryModelsDownload: {
-      title: "मॉडल डाउनलोड",
-      model: "मॉडल",
-      size: "आकार",
-      delta: "अंतर",
-      action: "कार्य",
-      download: "डाउनलोड",
-      delete: "हटाएं",
-      cancel: "रद्द करें",
-      close: "बंद करें",
-      starting: "शुरू हो रहा है…",
-      freeMemory: "खाली मेमोरी",
-      loading: "लोड हो रहा है…"
     },
 
     memoryInfo: {
@@ -304,7 +299,9 @@ export const i18n = {
     },
 
     query: {
-      welcome: "كيف يمكنني مساعدتك؟"
+      welcome: "كيف يمكنني مساعدتك؟",
+      systemPrompt: "أنت مساعد شخصي.",
+      questionLabel: "سؤال"
     },
 
     queryText: {
@@ -317,21 +314,6 @@ export const i18n = {
       models: "النماذج",
       noModel: "لم يتم العثور على نموذج",
       preloadStarted: "جارٍ تحميل النموذج {model}"
-    },
-
-    queryModelsDownload: {
-      title: "تنزيل النموذج",
-      model: "النموذج",
-      size: "الحجم",
-      delta: "الفرق",
-      action: "الإجراء",
-      download: "تنزيل",
-      delete: "حذف",
-      cancel: "إلغاء",
-      close: "إغلاق",
-      starting: "جارٍ البدء…",
-      freeMemory: "الذاكرة المتاحة",
-      loading: "جارٍ التحميل…"
     },
 
     memoryInfo: {

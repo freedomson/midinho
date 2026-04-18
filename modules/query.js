@@ -5,6 +5,7 @@ import { consume } from './node_modules/@lit-labs/context/index.js';
 import { picocss } from './style.js';
 import { store } from './store.js';
 import { OllamaChat } from './ollama-chat.js';
+import OllamaApi from './api.js';
 
 export class Query extends LitElement {
 
@@ -52,6 +53,7 @@ export class Query extends LitElement {
       baseUrl: 'http://localhost:11434',
       debug: true
     });
+
   }
 
   firstUpdated() {
@@ -68,13 +70,11 @@ export class Query extends LitElement {
 
   async submitQuery(query) {
     this.setLoading(true);
-
-    const selectedModel = store.model;
-
+    this.model = store.model
     const msg = {
       id: this.msgs.length,
       query,
-      model: selectedModel,
+      model: this.model,
       response: ""
     };
 
@@ -94,7 +94,7 @@ export class Query extends LitElement {
     this.ollama.run({
       lang: store.lang,
       query,
-      model: selectedModel,
+      model: this.model,
 
       onToken: (token) => {
         msgEl.write(token);
@@ -122,32 +122,39 @@ export class Query extends LitElement {
 
 
   clearCallBack() {
-    this.ollama.abort();
-    this.ollama.clearHistory();
-
-    this.msgs = [];
-    this.loading = false;
-    this.mdQueryText?.enable();
-
-    this.requestUpdate();
-    console.log("clearCallBack")
+    store.setLoading(true);
+    this.cancelCallBack(false, ()=>{
+      this.ollama.clearHistory();
+      this.msgs = [];
+    })
   }
 
-  cancelCallBack(e) {
+  async cancelCallBack(err, in_cb = false) {
+    store.setLoading(true);
     // ✅ Abort network request
+    let cb = in_cb
     this.ollama.abort();
-
+    this.loading = false;
+    await OllamaApi.stopModelFromSystem(store.model);
+    await OllamaApi.loadModelFromSystem(store.model);
     const msgEl = this.renderRoot.getElementById(
       `md-search-${this.msgs.length}`
     );
+    if (msgEl) {
+      msgEl.cancel(() => {
+        this.setLoading(false);
+        if (cb){
+          cb()
+        }
+        store.setLoading(false);
+        if (err) {
+          this.mdQueryText.setErrorMsg(err);
+        }
+      });
+    } else {
+      store.setLoading(false);
+    }
 
-    msgEl.cancel(() => {
-      this.setLoading(false);
-      this.mdQueryText.enable();
-      if (e) {
-        this.mdQueryText.setErrorMsg(e);
-      }
-    });
   }
 
   errorCallBack(e) {

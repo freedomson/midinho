@@ -62,9 +62,7 @@ export class QueryModels extends LitElement {
 
   getDownloadComponent() {
     return html`
-      <div
-        type="submit"
-        @click=${() => { this.showDownloadModel = true; }}>
+      <div type="submit" @click=${() => this.showDownloadModel = true}>
         ${store.t("queryModels.models")}
       </div>
     `;
@@ -126,7 +124,8 @@ export class QueryModels extends LitElement {
 
     if (!model || model === "no_model") return;
 
-    store.setLoading(store.t("queryModels.preloadStarted", { model }));
+    // store.setLoading(store.t("queryModels.preloadStarted", { model }));
+    store.setLoading(true);
 
     try {
       const alreadyLoaded = await OllamaApi.isModelLoaded(model);
@@ -180,7 +179,13 @@ export class QueryModels extends LitElement {
         ${this.showDownloadModel
           ? html`
               <md-query-models-download
-                .callback=${() => this.toggleDownloadModel()}>
+                .callback=${() => {
+                  this.showDownloadModel = false;
+                  queueMicrotask(() => {
+                    store.setModel(this.getSelectedModel());
+                    this.preloadModel();
+                  });
+                }}>
               </md-query-models-download>
             `
           : html`
