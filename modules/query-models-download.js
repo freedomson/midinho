@@ -65,16 +65,19 @@ export class QueryModelsDownload extends LitElement {
 
     // Model catalog
     this.defaultModels = [
-      { name: "smollm2:135m",       size: 0.271 * 1024 * 1024 * 1024, context: "8K",   input: ["text"] },
+      { name: "smollm2:135m",      size: 0.271 * 1024 * 1024 * 1024, context: "8K",   input: ["text"] },
       { name: "gemma3:4b",         size: 3.3   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"] },
       { name: "gemma3:12b",        size: 8.1   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"] },
+      { name: "gemma4:e4b",        size: 9.6   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"] },
+      { name: "medgemma:4b",       size: 3.3   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"] },
+      { name: "translategemma:4b", size: 3.3   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"] },
       { name: "llama3.1:8b",       size: 4.9   * 1024 * 1024 * 1024, context: "128K", input: ["text"] },
       { name: "llama3.2:3b",       size: 2.0   * 1024 * 1024 * 1024, context: "128K", input: ["text"] },
       { name: "deepseek-r1:14b",   size: 9.0   * 1024 * 1024 * 1024, context: "128K", input: ["text"] },
+      { name: "deepseek-r1:8b",    size: 5.2   * 1024 * 1024 * 1024, context: "128K", input: ["text"] },
       { name: "deepseek-r1:1.5b",  size: 1.1   * 1024 * 1024 * 1024, context: "128K", input: ["text"] },
       { name: "qwen3:8b",          size: 5.2   * 1024 * 1024 * 1024, context: "40K",  input: ["text"] },
-      { name: "mistral:7b",        size: 4.4   * 1024 * 1024 * 1024, context: "40K",  input: ["text"] },
-      { name: "gemma4:e4b",        size: 9.6   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"] }
+      { name: "mistral:7b",        size: 4.4   * 1024 * 1024 * 1024, context: "40K",  input: ["text"] }
     ];
   }
 
