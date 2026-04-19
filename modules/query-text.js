@@ -17,6 +17,9 @@ export class QueryText extends LitElement {
     .info {
       text-align: center
     }
+    .query-button-container {
+      margin: 0px !important;
+    }
   `];
 
   static properties = {
@@ -163,7 +166,7 @@ export class QueryText extends LitElement {
 
         ${this.renderText()}
 
-        <div role="group">
+        <div role="group" class="query-button-container">
           <md-query-start
             .processQuery=${(p) => this.processQuery(p)}>
           </md-query-start>
@@ -180,8 +183,6 @@ export class QueryText extends LitElement {
 
         <md-speak-selector></md-speak-selector>
 
-        <br />
-
         <div class="info">
           <small>
             ${store.t("queryText.aiWarning")}
@@ -191,8 +192,6 @@ export class QueryText extends LitElement {
 
       </div>
 
-      <br />
-      <br />
     `;
   }
 }

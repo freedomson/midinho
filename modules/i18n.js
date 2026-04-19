@@ -86,7 +86,7 @@ export const i18n = {
 
     queryText: {
       placeholder: "Pergunte qualquer coisa",
-      aiWarning: "O conteúdo gerado por IA pode estar incorreto"
+      aiWarning: "O conteúdo IA pode estar incorreto"
     },
 
     queryModels: {
@@ -146,7 +146,7 @@ export const i18n = {
 
     queryText: {
       placeholder: "Pregunta lo que quieras",
-      aiWarning: "El contenido generado por IA puede ser incorrecto"
+      aiWarning: "El contenido IA puede ser incorrecto"
     },
 
     queryModels: {

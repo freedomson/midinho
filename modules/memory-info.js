@@ -90,7 +90,9 @@ export class MemoryInfo extends LitElement {
 
     return html`
       <div>
-        ${title}: <strong>${this.freeMemoryMb}</strong> MB
+        <small>
+          ${title}: <strong>${this.freeMemoryMb}</strong> MB
+        </small>
       </div>
     `;
   }

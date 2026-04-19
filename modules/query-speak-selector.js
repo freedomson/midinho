@@ -116,7 +116,7 @@ setupSpeakerWorker() {
           @change=${(e) => this.onSpeakToggle(e)}
         />
         <span>
-          ${store.t("header.speak")}
+          <small>${store.t("header.speak")}</small>
         </span>
       </label>
       </div>
