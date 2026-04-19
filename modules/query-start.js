@@ -5,9 +5,6 @@ import { store } from './store.js';
 export class QueryStart extends LitElement {
   static styles = [picocss, css`
     #md-query-start-btn {
-      float: left;
-      margin-left: 0.5rem;
-      min-width: 3rem;
     }
   `];
 
@@ -42,14 +39,14 @@ export class QueryStart extends LitElement {
     const label = store.t("common.ask");
 
     return html`
-      <div
+      <button
         id="md-query-start-btn"
         @click=${this.disabled ? null : this.process}
         ?disabled=${this.disabled}
         type="submit"
       >
         ${label}
-      </div>
+      </button>
     `;
   }
 }

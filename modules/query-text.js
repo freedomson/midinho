@@ -12,10 +12,10 @@ export class QueryText extends LitElement {
   static styles = [picocss, css`
     #md-query-text {
       min-height: 8rem;
+      width: 82vw;
     }
-    .aiwarn {
-      text-align: center;
-      font-size: 1rem;
+    .info {
+      text-align: center
     }
   `];
 
@@ -159,32 +159,37 @@ export class QueryText extends LitElement {
 
   render() {
     return html`
-      ${this.renderText()}
+      <div class="container">
 
-      <fieldset role="group">
-        <md-query-start
-          .processQuery=${(p) => this.processQuery(p)}>
-        </md-query-start>
+        ${this.renderText()}
 
-        <md-query-stop
-          .cancelCallBack=${(err) => {
-            this.cancelCallBack?.(err);
-            this.onResponseStopped();
-          }}>
-        </md-query-stop>
-
-        <md-query-clear
-          .clearCallBack=${() => this.clearCallBack?.()}>
-        </md-query-clear>
+        <div role="group">
+          <md-query-start
+            .processQuery=${(p) => this.processQuery(p)}>
+          </md-query-start>
+          <md-query-stop
+            .cancelCallBack=${(err) => {
+              this.cancelCallBack?.(err);
+              this.onResponseStopped();
+            }}>
+          </md-query-stop>
+          <md-query-clear
+            .clearCallBack=${() => this.clearCallBack?.()}>
+          </md-query-clear>
+        </div>
 
         <md-speak-selector></md-speak-selector>
-      </fieldset>
 
-      <div class="aiwarn">
-        ${store.t("queryText.aiWarning")}
+        <br />
+
+        <div class="info">
+          <small>
+            ${store.t("queryText.aiWarning")}
+          </small>
+          <md-memory-info></md-memory-info>
+        </div>
+
       </div>
-
-      <md-memory-info></md-memory-info>
 
       <br />
       <br />

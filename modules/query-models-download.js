@@ -10,13 +10,9 @@ export class QueryModelsDownload extends LitElement {
     picocss,
     picocsscolor,
     css`
-      dialog { font-size: 1rem; }
-      .btn-mini { margin-bottom: 0; min-width: 1rem; }
-      #status-progress { text-align: right; }
-      .memline { font-size: 0.9rem; opacity: 0.85; margin: 0.25rem 0 0; }
-      .memerr { font-style: italic; }
-      .delta { display: inline-block; }
-      .actions { white-space: nowrap; }
+    .download {
+      text-align: center;
+    }
     `
   ];
 
@@ -65,8 +61,8 @@ export class QueryModelsDownload extends LitElement {
 
     // Model catalog
     this.defaultModels = [
-      { name: "smollm2:135m",      size: 0.271 * 1024 * 1024 * 1024, context: "8K",   input: ["text"] },
-      { name: "gemma3:4b",         size: 3.3   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"] },
+      { name: "smollm2:135m",      size: 0.271 * 1024 * 1024 * 1024, context: "8K",   input: ["text"]},
+      { name: "gemma3:4b",         size: 3.3   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"], ep: true },
       { name: "gemma3:12b",        size: 8.1   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"] },
       { name: "gemma4:e4b",        size: 9.6   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"] },
       { name: "medgemma:4b",       size: 3.3   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"] },
@@ -364,45 +360,51 @@ export class QueryModelsDownload extends LitElement {
       <dialog open>
         <article>
           <header>
-            <div class="grid">
-              <div>
-                <h1>${store.t("queryModelsDownload.title")}</h1>
-                ${this.renderFreeMemoryLine()}
-              </div>
-
-              ${(!this.ollamamodels.length || this.busy)
-                ? html``
-                : html`
-                    <div align="right">
-                      <button
-                        @click=${() => this.finish()}>
-                        ${store.t("queryModelsDownload.close")}
-                      </button>
-                    </div>
-                  `}
+            <div class="container download">
+              <h1>${store.t("queryModelsDownload.title")}</h1>
+              ${this.renderFreeMemoryLine()}
             </div>
           </header>
 
+          <div class="container download">
+
+          ${(!this.ollamamodels.length || this.busy)
+            ? html``
+            : html`
+                <div class="container">
+                  <button
+                    @click=${() => this.finish()}>
+                    ${store.t("queryModelsDownload.close")}
+                  </button>
+                </div>
+                <br />
+              `}
+
           ${this.busy ? html`
+
             <progress value="${this.downloadingProgressValue}" max="1"></progress>
-            <div class="grid">
+            <br />
+            <div class="container">
               <span aria-busy="true">${this.downloadingProgressStatus}</span>
+            </div>
+            <div class="container">
               <span id="status-progress">${this.downloadingProgressStatusProgress}</span>
             </div>
-            <br/>
-            <button @click=${() => this.cancelDownload()}>
-              ${store.t("queryModelsDownload.cancel")}
-            </button>
-            <br/>
-            <br/>
+            <br />
+            <div class="container">
+              <button @click=${() => this.cancelDownload()}>
+                ${store.t("queryModelsDownload.cancel")}
+              </button>
+            </div>
+            <br />
           ` : ''}
+          <div>
 
-          <table>
+          <table class="striped">
             <thead>
               <tr>
                 <th scope="col">${store.t("queryModelsDownload.model")}</th>
                 <th scope="col">${store.t("queryModelsDownload.size")}</th>
-                <th scope="col">${store.t("queryModelsDownload.delta")}</th>
                 <th scope="col">${store.t("queryModelsDownload.action")}</th>
               </tr>
             </thead>
@@ -424,18 +426,19 @@ export class QueryModelsDownload extends LitElement {
                               href="https://ollama.com/library/${model.name}">
                               ${model.name}
                             </a>
+                            ${model.ep ?
+                              html`<mark>${store.t("queryModelsDownload.editorPick")}</mark>`
+                              :``}
                           </small>
                         </th>
 
-                        <td><small>${sizeGb}GB</small></td>
-
                         <td>
-                          <small>
+                          <small>${sizeGb}GB
                             ${deltaGb == null
                               ? html`<span class="delta">—</span>`
                               : html`<span class="delta ${deltaClass}">${deltaGb}GB</span>`
                             }
-                          </small>
+                            </small>
                         </td>
 
                         <td class="actions">

@@ -175,7 +175,7 @@ export class QueryModels extends LitElement {
 
   render() {
     return html`
-      <fieldset role="group">
+      <div role="group">
         ${this.showDownloadModel
           ? html`
               <md-query-models-download
@@ -192,7 +192,7 @@ export class QueryModels extends LitElement {
               ${this.renderModelList()}
               ${this.getDownloadComponent()}
             `}
-      </fieldset>
+      </div>
     `;
   }
 }

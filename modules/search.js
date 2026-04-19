@@ -268,19 +268,18 @@ export class Search extends LitElement {
   render() {
     return html`
       <link rel="stylesheet" href="./css/prism.css">
-      <div class="search-container">
-        <div class="search-header-container">
+      <div class="search-container container">
+        <div class="search-header-container container">
           <div id="search-query" class="pico-background-sand-50"></div>
         </div>
-        <div id="search-response">
-        </div>
+        <div id="search-response" class="container"></div>
         ${!this.loading ? html`
-          <div class="container">
-            <small>
-              ${this.msg.model}
-            </small>
-          </div>` :
-          html `<p class="search-response-loading" aria-busy="true">&nbsp;</p>`}
+        <div class="container">
+          <small>
+            ${this.msg.model}
+          </small>
+        </div>` :
+        html `<p class="search-response-loading container" aria-busy="true">&nbsp;</p>`}
       </div>
     `;
   }

@@ -48,7 +48,8 @@ export const i18n = {
       close: "Close",
       starting: "starting…",
       freeMemory: "Free memory",
-      loading: "loading…"
+      loading: "loading…",
+      editorPick: "Editor’s pick"
     },
 
     memoryInfo: {
@@ -62,7 +63,7 @@ export const i18n = {
 
   pt_PT: {
     common: {
-      ask: "Enviar",
+      ask: "Perguntar",
       cancel: "Cancelar",
       close: "Fechar",
       delete: "Apagar",
@@ -101,13 +102,14 @@ export const i18n = {
       size: "Tamanho",
       delta: "Delta",
       action: "Ação",
-      download: "Copiar",
+      download: "Obter",
       delete: "Apagar",
       cancel: "Cancelar",
       close: "Fechar",
       starting: "a iniciar…",
       freeMemory: "Memória livre",
-      loading: "a carregar…"
+      loading: "a carregar…",
+      editorPick: "Escolha do editor"
     },
 
     memoryInfo: {
@@ -121,7 +123,7 @@ export const i18n = {
 
   es_ES: {
     common: {
-      ask: "Enviar",
+      ask: "Preguntar",
       cancel: "Cancelar",
       close: "Cerrar",
       delete: "Eliminar",
@@ -133,7 +135,7 @@ export const i18n = {
 
     header: {
       language: "Español",
-      speak: "Hablar"
+      speak: "Hablar respuestas"
     },
 
     query: {
@@ -166,7 +168,8 @@ export const i18n = {
       close: "Cerrar",
       starting: "iniciando…",
       freeMemory: "Memoria libre",
-      loading: "cargando…"
+      loading: "cargando…",
+      editorPick: "Selección del editor"
     },
 
     memoryInfo: {
@@ -225,7 +228,8 @@ export const i18n = {
       close: "关闭",
       starting: "启动中…",
       freeMemory: "可用内存",
-      loading: "加载中…"
+      loading: "加载中…",
+      editorPick: "编辑推荐"
     },
 
     memoryInfo: {
@@ -272,6 +276,22 @@ export const i18n = {
       preloadStarted: "मॉडल लोड हो रहा है {model}"
     },
 
+    queryModelsDownload: {
+      title: "मॉडल डाउनलोड करें",
+      model: "मॉडल",
+      size: "आकार",
+      delta: "डेल्टा",
+      action: "क्रिया",
+      download: "डाउनलोड",
+      delete: "हटाएं",
+      cancel: "रद्द करें",
+      close: "बंद करें",
+      starting: "शुरू हो रहा है…",
+      freeMemory: "खाली मेमोरी",
+      loading: "लोड हो रहा है…",
+      editorPick: "संपादक की पसंद"
+    },
+
     memoryInfo: {
       title: "खाली मेमोरी",
       loading: "लोड हो रहा है…",
@@ -314,6 +334,22 @@ export const i18n = {
       models: "النماذج",
       noModel: "لم يتم العثور على نموذج",
       preloadStarted: "جارٍ تحميل النموذج {model}"
+    },
+
+    queryModelsDownload: {
+      title: "تنزيل النموذج",
+      model: "النموذج",
+      size: "الحجم",
+      delta: "دلتا",
+      action: "الإجراء",
+      download: "تنزيل",
+      delete: "حذف",
+      cancel: "إلغاء",
+      close: "إغلاق",
+      starting: "جارٍ البدء…",
+      freeMemory: "الذاكرة المتاحة",
+      loading: "جارٍ التحميل…",
+      editorPick: "اختيار المحرر"
     },
 
     memoryInfo: {

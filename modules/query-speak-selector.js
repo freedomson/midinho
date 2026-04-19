@@ -7,17 +7,7 @@ import { WorkerPool } from "./workerPool.js"
 export class Header extends LitElement {
   static styles = [picocss, css`
 
-    .speak-toggle {
-      display: inline-flex;
-      align-items: center;
-    }
 
-    .speak-label {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-size: 1rem;
-    }
   `];
 
   connectedCallback() {
@@ -103,9 +93,9 @@ setupSpeakerWorker() {
 
     return html`
       <!-- Language selector -->
+      <div class="container">
       <select
         id="md-speak-selector"
-        class="md-speak-selector"
         .value=${store.lang || DEFAULT_LANG}
         @change=${(e) => this.onLanguageChange(e)}>
 
@@ -117,7 +107,7 @@ setupSpeakerWorker() {
       </select>
 
       <!-- Speak toggle -->
-      <label class="speak-toggle">
+      <label class="container">
         <input
           type="checkbox"
           role="switch"
@@ -125,10 +115,11 @@ setupSpeakerWorker() {
           ?disabled=${!store.lang}
           @change=${(e) => this.onSpeakToggle(e)}
         />
-        <span class="speak-label">
+        <span>
           ${store.t("header.speak")}
         </span>
       </label>
+      </div>
     `;
   }
 }

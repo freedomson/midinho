@@ -6,10 +6,7 @@ export class QueryClear extends LitElement {
 
   static styles = [picocss, css`
     #md-query-clear-btn {
-      float: left;
-      margin-left: 0.5rem;
-      margin-bottom: 0px;
-      min-width: 3rem;
+      margin-left:1px;
     }
   `];
 
@@ -46,14 +43,14 @@ export class QueryClear extends LitElement {
     const label = store.t("common.clear");
 
     return html`
-      <div
+      <button
         id="md-query-clear-btn"
         @click=${this.disabled ? null : this.execute.bind(this)}
         ?disabled=${this.disabled}
         type="submit"
       >
         ${label}
-      </div>
+      </button>
     `;
   }
 }

@@ -5,15 +5,7 @@ import { store } from './store.js';
 export class MemoryInfo extends LitElement {
 
   static styles = [picocss, css`
-    .meminfo {
-      text-align: center;
-      font-size: 0.9rem;
-      opacity: 0.9;
-      margin-top: 0.5rem;
-    }
-    .error {
-      font-style: italic;
-    }
+
   `];
 
   static properties = {
@@ -90,14 +82,14 @@ export class MemoryInfo extends LitElement {
 
     if (this.freeMemoryMb === null) {
       return html`
-        <div class="meminfo">
+        <div>
           ${title}: <em>${store.t("memoryInfo.loading")}</em>
         </div>
       `;
     }
 
     return html`
-      <div class="meminfo">
+      <div>
         ${title}: <strong>${this.freeMemoryMb}</strong> MB
       </div>
     `;

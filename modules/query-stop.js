@@ -6,10 +6,7 @@ export class QueryStop extends LitElement {
 
   static styles = [picocss, css`
     #md-query-stop-btn {
-      float: left;
-      margin-left: 0.5rem;
-      margin-bottom: 0px;
-      min-width: 3rem;
+      margin-left:1px;
     }
   `];
 
@@ -53,14 +50,14 @@ export class QueryStop extends LitElement {
     const label = store.t("common.stop");
 
     return html`
-      <div
+      <button
         id="md-query-stop-btn"
         @click=${this.disabled ? null : this.queryStop.bind(this)}
         ?disabled=${this.disabled}
         type="submit"
       >
         ${label}
-      </div>
+      </button>
     `;
   }
 }
