@@ -189,7 +189,7 @@ export class QueryText extends LitElement {
           </small>
           <md-memory-info></md-memory-info>
         </div>
-
+        </br>
       </div>
 
     `;

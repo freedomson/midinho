@@ -82,13 +82,15 @@ class App extends LitElement {
       ${
         this._loadSourceCodeTask.render({
           initial: () => html`<br /><p>Waiting to start task</p>`,
-          pending: () => html`
-            <br />
-            <md-header></md-header>
-            <progress ></progress>
-            `,
+          pending: () => store.setLoading(true)
+            // html`
+            // <br />
+            // <md-header></md-header>
+            // <progress ></progress>
+            // `
+          ,
           complete: (value) => this.onSuccess(),
-          error: (error) => html`
+          error: (error) => store.setLoading(false) || html`
             <md-header></md-header>
             <md-error .error=${error}></md-error>
           `,
