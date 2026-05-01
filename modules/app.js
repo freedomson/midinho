@@ -68,7 +68,7 @@ class App extends LitElement {
       <md-nav></md-nav>
       ${
         !this.ollamamodels.length ?
-        html `<md-query-models-download></md-query-models-download>`
+        store.setLoading(false) || html `<md-query-models-download></md-query-models-download>`
         :
         html `<md-query></md-query>`
       }
