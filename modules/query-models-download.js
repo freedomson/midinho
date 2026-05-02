@@ -61,19 +61,39 @@ export class QueryModelsDownload extends LitElement {
 
     // Model catalog
     this.defaultModels = [
-      { name: "smollm2:135m",      size: 0.271 * 1024 * 1024 * 1024, context: "8K",   input: ["text"]},
-      { name: "gemma3:4b",         size: 3.3   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"], ep: true },
-      { name: "gemma3:12b",        size: 8.1   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"] },
-      { name: "gemma4:e4b",        size: 9.6   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"] },
-      { name: "medgemma:4b",       size: 3.3   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"] },
-      { name: "translategemma:4b", size: 3.3   * 1024 * 1024 * 1024, context: "128K", input: ["text", "image"] },
-      { name: "llama3.1:8b",       size: 4.9   * 1024 * 1024 * 1024, context: "128K", input: ["text"] },
-      { name: "llama3.2:3b",       size: 2.0   * 1024 * 1024 * 1024, context: "128K", input: ["text"] },
-      { name: "deepseek-r1:14b",   size: 9.0   * 1024 * 1024 * 1024, context: "128K", input: ["text"] },
-      { name: "deepseek-r1:8b",    size: 5.2   * 1024 * 1024 * 1024, context: "128K", input: ["text"] },
-      { name: "deepseek-r1:1.5b",  size: 1.1   * 1024 * 1024 * 1024, context: "128K", input: ["text"] },
-      { name: "qwen3:8b",          size: 5.2   * 1024 * 1024 * 1024, context: "40K",  input: ["text"] },
-      { name: "mistral:7b",        size: 4.4   * 1024 * 1024 * 1024, context: "40K",  input: ["text"] }
+      // --- ULTRA LIGHT / FALLBACK (runs anywhere) ---
+      { name: "smollm2:135m",      size: 0.271 * 1024**3, context: "8K",   input: ["text"] },
+      { name: "tinyllama:1.1b",    size: 0.7   * 1024**3, context: "16K",  input: ["text"] },   // added
+      { name: "deepseek-r1:1.5b",  size: 1.1   * 1024**3, context: "128K", input: ["text"] },
+
+      // --- SMALL BUT POWERFUL (best efficiency tier) ---
+      { name: "phi3:mini",         size: 2.3   * 1024**3, context: "128K", input: ["text"] },   // added
+      { name: "llama3.2:3b",       size: 2.0   * 1024**3, context: "128K", input: ["text"] },
+      { name: "qwen2.5:3b",        size: 2.0   * 1024**3, context: "128K", input: ["text"] },   // added
+      { name: "gemma2:2b",         size: 1.6   * 1024**3, context: "8K",   input: ["text"] },
+
+      // --- MID TIER (daily usable offline) ---
+      { name: "mistral:7b",        size: 4.4   * 1024**3, context: "40K",  input: ["text"] },
+      { name: "llama3.1:8b",       size: 4.9   * 1024**3, context: "128K", input: ["text"] },
+      { name: "qwen2.5:7b",        size: 4.7   * 1024**3, context: "128K", input: ["text"] },   // added
+      { name: "qwen3:8b",          size: 5.2   * 1024**3, context: "40K",  input: ["text"] },
+
+      // --- REASONING SPECIALISTS ---
+      { name: "deepseek-r1:8b",    size: 5.2   * 1024**3, context: "128K", input: ["text"] },
+      { name: "deepseek-r1:14b",   size: 9.0   * 1024**3, context: "128K", input: ["text"] },
+
+      // --- MULTIMODAL (image support) ---
+      { name: "gemma3:4b",         size: 3.3   * 1024**3, context: "128K", input: ["text", "image"], ep: true },
+      { name: "gemma3:12b",        size: 8.1   * 1024**3, context: "128K", input: ["text", "image"] },
+      { name: "gemma4:e4b",        size: 9.6   * 1024**3, context: "128K", input: ["text", "image"] },
+      { name: "medgemma:4b",       size: 3.3   * 1024**3, context: "128K", input: ["text", "image"] },
+      { name: "translategemma:4b", size: 3.3   * 1024**3, context: "128K", input: ["text", "image"] },
+
+      // --- CODING ---
+      { name: "codellama:7b",      size: 3.8   * 1024**3, context: "16K",  input: ["text"] },   // added
+
+      // --- HIGH QUALITY GENERAL ---
+      { name: "gemma2:9b",         size: 5.4   * 1024**3, context: "8K",   input: ["text"] }    // added
     ];
   }
 
