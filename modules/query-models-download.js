@@ -440,12 +440,7 @@ export class QueryModelsDownload extends LitElement {
                       <tr>
                         <th scope="row">
                           <small>
-                            <a
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              href="https://ollama.com/library/${model.name}">
                               ${model.name}
-                            </a>
                             ${model.ep ?
                               html`<mark>${store.t("queryModelsDownload.editorPick")}</mark>`
                               :``}

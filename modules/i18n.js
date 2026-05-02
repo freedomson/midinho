@@ -60,7 +60,64 @@ export const i18n = {
       fetchFailed: "fetch failed"
     }
   },
+  fr_FR: {
+    common: {
+      ask: "Demander",
+      cancel: "Annuler",
+      close: "Fermer",
+      delete: "Supprimer",
+      download: "Télécharger",
+      loading: "Chargement…",
+      stop: "Arrêter",
+      clear: "Effacer"
+    },
 
+    header: {
+      language: "Français",
+      speak: "Lire les réponses"
+    },
+
+    query: {
+      welcome: "Comment puis-je vous aider ?",
+      systemPrompt: "Vous êtes un assistant personnel.",
+      questionLabel: "Question"
+    },
+
+    queryText: {
+      placeholder: "Posez n’importe quelle question",
+      aiWarning: "Le contenu généré par l’IA peut être incorrect"
+    },
+
+    queryModels: {
+      selectModel: "Veuillez sélectionner un LLM",
+      models: "Modèles",
+      noModel: "Aucun modèle trouvé",
+      preloadStarted: "Chargement du modèle {model}"
+    },
+    queryModelsDownload: {
+      title: "Télécharger le modèle",
+      model: "Modèle",
+      size: "Taille",
+      delta: "Delta",
+      action: "Action",
+      download: "Télécharger",
+      delete: "Supprimer",
+      cancel: "Annuler",
+      close: "Fermer",
+      starting: "démarrage…",
+      freeMemory: "Mémoire libre",
+      loading: "chargement…",
+      editorPick: "Choix de l’éditeur"
+    },
+
+    memoryInfo: {
+      title: "Mémoire libre",
+      loading: "chargement…",
+      endpointError: "erreur du point de terminaison",
+      invalidPayload: "payload invalide",
+      fetchFailed: "échec de la récupération"
+    }
+  },
   pt_PT: {
     common: {
       ask: "Perguntar",
